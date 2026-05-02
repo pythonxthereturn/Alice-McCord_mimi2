@@ -1,6 +1,4 @@
-# ===================== 1. 初始化32×32的qw列表（统一用你最开始的qw，删掉冗余的pw） =====================
-
-
+import inspect
 
 
 
@@ -104,7 +102,7 @@ def render_diamond_light(pw_list, grid_size=32):
 
 qwer1 = 0
 for i in range(32 // 2):
-    qw1[qwer1] = 9
+    qw1[qwer1] = Point(center_index=qwer1, brightness=9)
     qwer1 += 2
 
 
@@ -130,3 +128,36 @@ print_grid(final_grid2, "final_grid2")
 print_grid(final_grid3, "final_grid3")
 print_grid(final_grid4, "final_grid4")
 print_grid(final_grid5, "final_grid5 (最顶层)")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+while True:
+    a1 = input("输入文本: ")
+    a2 = list(a1)
+    for char in a2:
+        a1_encoded = char.encode("utf-8")
+        bin_str = ''.join(f'{byte:08b}' for byte in a1_encoded)
+        bin_32 = bin_str.ljust(32, '0')[:32]
+        print(f"'{char}' -> {bin_32}")
+
+
+
+
+
+
+
+
+
+
