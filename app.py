@@ -63,24 +63,27 @@ qw1[400] = Point(center_index=400, brightness=9)
 
 
 
-# ===================== 4. 核心菱形渲染函数（完全保留你的原逻辑，只做稳定性优化） =====================
+# ===================== 4. 核心菱形渲染函数（保留原始值，最大不超过9） =====================
 def render_diamond_light(pw_list, grid_size=32):
-    # 新建渲染缓冲，不破坏原qw里的Point对象，不会渲染一次就把类覆盖成数字
-    render_buffer = [0] * (grid_size * grid_size)
+    # 先复制原始值作为基础
+    render_buffer = []
+    for item in pw_list:
+        if isinstance(item, Point):
+            render_buffer.append(0)
+        else:
+            render_buffer.append(item)
 
     # 遍历整个列表，找所有Point类的光源
     for idx, item in enumerate(pw_list):
-        # 核心判断：当前元素是不是Point类，不是就跳过
         if not isinstance(item, Point):
             continue
         
-        # 是Point类，自动读取中心位置和亮度，执行渲染
         center_idx = item.center_index
         light_level = item.brightness
         cx = center_idx % grid_size
         cy = center_idx // grid_size
 
-        # 你的原菱形扩散逻辑（曼哈顿距离）完全保留
+        # 菱形扩散逻辑
         for dy in range(-light_level, light_level + 1):
             for dx in range(-light_level, light_level + 1):
                 dist = abs(dx) + abs(dy)
@@ -89,15 +92,20 @@ def render_diamond_light(pw_list, grid_size=32):
                 
                 nx = cx + dx
                 ny = cy + dy
-                # 边界判断，不超出32×32网格
                 if 0 <= nx < grid_size and 0 <= ny < grid_size:
                     target_idx = ny * grid_size + nx
-                    # 多光源取最大亮度，想叠加亮度就把max改成+=
-                    render_buffer[target_idx] = max(render_buffer[target_idx], light_level - dist)
+                    new_val = light_level - dist
+                    # 只替换更大的值，但不超过9
+                    if new_val > render_buffer[target_idx]:
+                        render_buffer[target_idx] = min(new_val, 9)
     
     return render_buffer
 
 
+qwer1 = 0
+for i in range(32 // 2):
+    qw1[qwer1] = 9
+    qwer1 += 2
 
 
 
@@ -105,31 +113,20 @@ def render_diamond_light(pw_list, grid_size=32):
 
 
 
-
-
-# ===================== 5. 执行渲染 + 纵向堆叠打印5个32×32格子 =====================
+# ===================== 5. 执行渲染并打印所有5个格子 =====================
 final_grid1 = render_diamond_light(qw1, GRID_SIZE)
 final_grid2 = render_diamond_light(qw2, GRID_SIZE)
 final_grid3 = render_diamond_light(qw3, GRID_SIZE)
 final_grid4 = render_diamond_light(qw4, GRID_SIZE)
 final_grid5 = render_diamond_light(qw5, GRID_SIZE)
 
-print("========== final_grid1 (最底层) ==========")
-for i in range(0, 32*32, GRID_SIZE):
-    print(final_grid1[i:i+GRID_SIZE])
+def print_grid(grid, title, grid_size=32):
+    print(f"========== {title} ==========")
+    for i in range(0, grid_size * grid_size, grid_size):
+        print(grid[i:i+grid_size])
 
-print("\n========== final_grid2 ==========")
-for i in range(0, 32*32, GRID_SIZE):
-    print(final_grid2[i:i+GRID_SIZE])
-
-print("\n========== final_grid3 ==========")
-for i in range(0, 32*32, GRID_SIZE):
-    print(final_grid3[i:i+GRID_SIZE])
-
-print("\n========== final_grid4 ==========")
-for i in range(0, 32*32, GRID_SIZE):
-    print(final_grid4[i:i+GRID_SIZE])
-
-print("\n========== final_grid5 (最顶层) ==========")
-for i in range(0, 32*32, GRID_SIZE):
-    print(final_grid5[i:i+GRID_SIZE])
+print_grid(final_grid1, "final_grid1 (最底层)")
+print_grid(final_grid2, "final_grid2")
+print_grid(final_grid3, "final_grid3")
+print_grid(final_grid4, "final_grid4")
+print_grid(final_grid5, "final_grid5 (最顶层)")
