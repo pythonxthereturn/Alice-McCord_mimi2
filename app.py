@@ -100,12 +100,41 @@ def render_diamond_light(pw_list, grid_size=32):
     return render_buffer
 
 
+
+
+# 神经元分布逻辑
 qwer1 = 0
 for i in range(32 // 2):
-    qw1[qwer1] = Point(center_index=qwer1, brightness=9)
+    qw1[qwer1] = Point(center_index=qwer1, brightness=9)# 初始逻辑不能动
     qwer1 += 2
 
 
+qwera1 = 31
+for i in range(200):
+    qw1[qwera1] = Point(center_index=qwera1, brightness=1)
+    qwera1 += 4
+
+qwera2 = 0
+for i in range(200):
+    qw2[qwera2] = Point(center_index=qwera2, brightness=1)
+    qwera2 += 5
+
+qwera3 = 0
+for i in range(200):
+    qw3[qwera3] = Point(center_index=qwera3, brightness=1)
+    qwera3 += 5
+
+qwera4 = 0
+for i in range(200):
+    qw4[qwera4] = Point(center_index=qwera4, brightness=1)
+    qwera4 += 5
+
+qwera5 = 0
+for i in range(200):
+    qw5[qwera5] = Point(center_index=qwera5, brightness=1)
+    qwera5 += 5
+
+# --------------------
 
 
 
