@@ -1,6 +1,39 @@
 # ===================== 1. 初始化32×32的qw列表（统一用你最开始的qw，删掉冗余的pw） =====================
+
+
+
+
+
 GRID_SIZE = 32
-qw = [0] * (GRID_SIZE * GRID_SIZE)  # 一次性初始化1024个0，和你循环append效果完全一致
+qw1 = [0] * (GRID_SIZE * GRID_SIZE)  # 一次性初始化1024个0，和你循环append效果完全一致
+qw2 = [0] * (GRID_SIZE * GRID_SIZE)
+qw3 = [0] * (GRID_SIZE * GRID_SIZE)
+qw4 = [0] * (GRID_SIZE * GRID_SIZE)
+qw5 = [0] * (GRID_SIZE * GRID_SIZE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ===================== 2. 修复后的Point类（解决默认参数坑，保留你要的所有属性） =====================
 class Point:
@@ -14,9 +47,21 @@ class Point:
 
 # ===================== 3. 给qw添加你要的光源（这里放的Point，渲染函数会100%识别到） =====================
 # 你原来的亮度9的核心光源，放在qw[400]
-qw[400] = Point(center_index=400, brightness=9)
+qw1[400] = Point(center_index=400, brightness=9)
 # 可以随便加多个光源测试，比如：
 # qw[200] = Point(center_index=200, brightness=5)
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ===================== 4. 核心菱形渲染函数（完全保留你的原逻辑，只做稳定性优化） =====================
 def render_diamond_light(pw_list, grid_size=32):
@@ -52,11 +97,39 @@ def render_diamond_light(pw_list, grid_size=32):
     
     return render_buffer
 
-# ===================== 5. 执行渲染 + 按32个一行打印结果 =====================
-# 重点：把放了Point的qw列表传给渲染函数！！
-final_grid = render_diamond_light(qw, GRID_SIZE)
 
-# 按32个一行打印，修复语法错误
-for i in range(0, len(final_grid), GRID_SIZE):
-    row_data = final_grid[i:i+GRID_SIZE]
-    print(row_data)
+
+
+
+
+
+
+
+
+
+# ===================== 5. 执行渲染 + 纵向堆叠打印5个32×32格子 =====================
+final_grid1 = render_diamond_light(qw1, GRID_SIZE)
+final_grid2 = render_diamond_light(qw2, GRID_SIZE)
+final_grid3 = render_diamond_light(qw3, GRID_SIZE)
+final_grid4 = render_diamond_light(qw4, GRID_SIZE)
+final_grid5 = render_diamond_light(qw5, GRID_SIZE)
+
+print("========== final_grid1 (最底层) ==========")
+for i in range(0, 32*32, GRID_SIZE):
+    print(final_grid1[i:i+GRID_SIZE])
+
+print("\n========== final_grid2 ==========")
+for i in range(0, 32*32, GRID_SIZE):
+    print(final_grid2[i:i+GRID_SIZE])
+
+print("\n========== final_grid3 ==========")
+for i in range(0, 32*32, GRID_SIZE):
+    print(final_grid3[i:i+GRID_SIZE])
+
+print("\n========== final_grid4 ==========")
+for i in range(0, 32*32, GRID_SIZE):
+    print(final_grid4[i:i+GRID_SIZE])
+
+print("\n========== final_grid5 (最顶层) ==========")
+for i in range(0, 32*32, GRID_SIZE):
+    print(final_grid5[i:i+GRID_SIZE])
