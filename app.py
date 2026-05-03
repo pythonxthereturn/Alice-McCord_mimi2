@@ -1,5 +1,5 @@
 import inspect
-
+import time
 
 
 GRID_SIZE = 32
@@ -172,6 +172,7 @@ print_grid(final_grid5, "final_grid5 (最顶层)")
 
 
 
+
 while True:
     a1 = input("输入文本: ")
     a2 = list(a1)
@@ -181,6 +182,65 @@ while True:
         bin_32 = bin_str.ljust(32, '0')[:32]
         print(f"'{char}' -> {bin_32}")
 
+    
+
+
+
+
+
+    aqw1 = []
+    for z1 in range(len(qw1)):
+        if isinstance(qw1[int(z1)], Point) and qw1[int(z1)].brightness == 1:
+            aqw1.append(z1)
+
+    aqw2 = []
+    for z2 in range(len(qw2)):
+        if isinstance(qw2[int(z2)], Point) and qw2[int(z2)].brightness == 1:
+            aqw2.append(z2)
+
+    aqw3 = []
+    for z3 in range(len(qw3)):
+        if isinstance(qw3[int(z3)], Point) and qw3[int(z3)].brightness == 1:
+            aqw3.append(z3)
+
+    aqw4 = []
+    for z4 in range(len(qw4)):
+        if isinstance(qw4[int(z4)], Point) and qw4[int(z4)].brightness == 1:
+            aqw4.append(z4)
+
+    aqw5 = []
+    for z5 in range(len(qw5)):
+        if isinstance(qw5[int(z5)], Point) and qw5[int(z5)].brightness == 1:
+            aqw5.append(z5)
+    #
+    
+            
+
+
+
+
+
+
+
+    print(f"========== 1 ==========")
+    for i in range(0, len(aqw1), 24):
+        print(aqw1[i:i+24])
+
+    print(f"========== 2 ==========")
+    for i in range(0, len(aqw2), 24):
+        print(aqw2[i:i+24])
+
+    print(f"========== 3 ==========")
+    for i in range(0, len(aqw3), 24):
+        print(aqw3[i:i+24])
+
+    print(f"========== 4 ==========")
+    for i in range(0, len(aqw4), 24):
+        print(aqw4[i:i+24])
+
+    print(f"========== 5 ==========")
+    for i in range(0, len(aqw5), 24):
+        print(aqw5[i:i+24])
 
 
 
@@ -189,4 +249,18 @@ while True:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+    # -----------定时更新-------------
+    time.sleep(30)
 
