@@ -30,7 +30,19 @@ ax13 = 0
 ax14 = 0
 ax15 = 0
 ax16 = 0
+ax17 = False
+qw1[400] = Point(center_index=400, brightness=9)
+qw1[399] = Point(center_index=390, brightness=9)
 while True:
+    # 修改1：每次循环开始清空所有待处理列表，防止累积
+    ax8.clear()
+    ax9.clear()
+    ax10.clear()
+    ax11.clear()
+    ax12.clear()
+    ax6.clear()
+    ax7.clear()
+    
     ax1 = input("input:")
     ax2 = list(ax1)
     for i in ax2:
@@ -42,44 +54,36 @@ while True:
     # 随机池
     for i in range(len(ax6)):
         ax7.append(ax6[i][:8])
-
-
-
-
-    # 遍历整个列表，找所有Point类<9的光源
+    # 遍历整个列表，找所有brightness == 9的Point实例
     for i in range(len(qw1)):
-        if inspect.isclass(qw1[i]):
-            if qw2[i].brightness == 9:
-                ax8.append(i)# 记录哪些需要进行渲染
+        if isinstance(qw1[i], Point):
+            if qw1[i].brightness == 9:
+                # 修改2：保存索引和原始亮度，防止退火时互相覆盖
+                ax8.append( (i, qw1[i].brightness) )
   
             
     for i in range(len(qw2)):
-        if inspect.isclass(qw2[i]):
+        if isinstance(qw2[i], Point):
             if qw2[i].brightness == 9:
-                ax9.append(i)# 记录哪些需要进行渲染
+                ax9.append( (i, qw2[i].brightness) )
    
     for i in range(len(qw3)):
-        if inspect.isclass(qw3[i]):
+        if isinstance(qw3[i], Point):
             if qw3[i].brightness == 9:
-                ax10.append(i)# 记录哪些需要进行渲染
+                ax10.append( (i, qw3[i].brightness) )
  
-            ax10.append(i)
     for i in range(len(qw4)):
-        if inspect.isclass(qw4[i]):
+        if isinstance(qw4[i], Point):
             if qw4[i].brightness == 9:
-                ax11.append(i)# 记录哪些需要进行渲染
-
-            ax11.append(i)
+                ax11.append( (i, qw4[i].brightness) )
     for i in range(len(qw5)):
-        if inspect.isclass(qw5[i]):
+        if isinstance(qw5[i], Point):
             if qw5[i].brightness == 9:
-                ax12.append(i)# 记录哪些需要进行渲染
-
+                ax12.append( (i, qw5[i].brightness) )
     #
-
     # -----------进行渲染--------------
     # qw1
-    for i in ax8:
+    for i, _ in ax8:
         cx = i % 32
         cy = i // 32
         ax14 = qw1[i].brightness
@@ -99,9 +103,8 @@ while True:
                     else:
                         if ax16 > qw1[ax15]:
                             qw1[ax15] = min(ax16, 9)
-
     # qw2
-    for i in ax9:
+    for i, _ in ax9:
         cx = i % 32
         cy = i // 32
         ax14 = qw2[i].brightness
@@ -121,9 +124,8 @@ while True:
                     else:
                         if ax16 > qw2[ax15]:
                             qw2[ax15] = min(ax16, 9)
-
     # qw3
-    for i in ax10:
+    for i, _ in ax10:
         cx = i % 32
         cy = i // 32
         ax14 = qw3[i].brightness
@@ -143,9 +145,8 @@ while True:
                     else:
                         if ax16 > qw3[ax15]:
                             qw3[ax15] = min(ax16, 9)
-
     # qw4
-    for i in ax11:
+    for i, _ in ax11:
         cx = i % 32
         cy = i // 32
         ax14 = qw4[i].brightness
@@ -165,9 +166,8 @@ while True:
                     else:
                         if ax16 > qw4[ax15]:
                             qw4[ax15] = min(ax16, 9)
-
     # qw5
-    for i in ax12:
+    for i, _ in ax12:
         cx = i % 32
         cy = i // 32
         ax14 = qw5[i].brightness
@@ -187,28 +187,199 @@ while True:
                     else:
                         if ax16 > qw5[ax15]:
                             qw5[ax15] = min(ax16, 9)
-
-
-
-
-        print("======区块一==========")
-        for i in range(0, 32*32,32):
-            print(qw1[i:i+32])
-
-        print("\n==========区块2==========")
-        for i in range(0, 32*32, 32):
-            print(qw2[i:i+32])
-
-        print("\n==========区块3==========")
-        for i in range(0, 32*32, 32):
-            print(qw3[i:i+32])
-
-        print("\n========== 区块4 ==========")
-        for i in range(0, 32*32, 32):
-            print(qw4[i:i+32])
-
-        print("\n========== 区块5 ==========")
-        for i in range(0, 32*32, 32):
-            print(qw5[i:i+32])
-
-
+                    # ----
+       
+    # ------------------退火-----------------
+    for i, ax14 in ax8:  # 直接使用保存的原始亮度
+        cx = i % 32
+        cy = i // 32
+        block_modified = False  # 每个区块开头重新初始化，绝对独立
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 > ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 32:
+                    ax15 = ny * 32 + nx
+                    ax16 = -(ax14 - ax13)
+                    changed = False
+                    if isinstance(qw1[ax15], Point):
+                        # 修改3：把 < 改成 <=，彻底清除残留的1
+                        if ax16 <= qw1[ax15].brightness:
+                            qw1[ax15].brightness = max(ax16, 0)
+                            changed = True
+                    else:
+                        # 同样改成 <=
+                        if ax16 <= qw1[ax15]:
+                            qw1[ax15] = max(ax16, 0)
+                            changed = True
+                    if changed:
+                        block_modified = True
+        if block_modified:
+            print("已删除")
+    # -----------
+    # qw2
+    for i, ax14 in ax9:
+        cx = i % 32
+        cy = i // 32
+        block_modified = False
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 > ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 32:
+                    ax15 = ny * 32 + nx
+                    ax16 = -(ax14 - ax13)
+                    changed = False
+                    if isinstance(qw2[ax15], Point):
+                        if ax16 <= qw2[ax15].brightness:
+                            qw2[ax15].brightness = max(ax16, 0)
+                            changed = True
+                    else:
+                        if ax16 <= qw2[ax15]:
+                            qw2[ax15] = max(ax16, 0)
+                            changed = True
+                    if changed:
+                        block_modified = True
+        if block_modified:
+            print("已删除")
+    # -----------
+    # qw3
+    for i, ax14 in ax10:
+        cx = i % 32
+        cy = i // 32
+        block_modified = False
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 > ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 32:
+                    ax15 = ny * 32 + nx
+                    ax16 = -(ax14 - ax13)
+                    changed = False
+                    if isinstance(qw3[ax15], Point):
+                        if ax16 <= qw3[ax15].brightness:
+                            qw3[ax15].brightness = max(ax16, 0)
+                            changed = True
+                    else:
+                        if ax16 <= qw3[ax15]:
+                            qw3[ax15] = max(ax16, 0)
+                            changed = True
+                    if changed:
+                        block_modified = True
+        if block_modified:
+            print("已删除")
+    # -----------
+    # qw4
+    for i, ax14 in ax11:
+        cx = i % 32
+        cy = i // 32
+        block_modified = False
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 > ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 32:
+                    ax15 = ny * 32 + nx
+                    ax16 = -(ax14 - ax13)
+                    changed = False
+                    if isinstance(qw4[ax15], Point):
+                        if ax16 <= qw4[ax15].brightness:
+                            qw4[ax15].brightness = max(ax16, 0)
+                            changed = True
+                    else:
+                        if ax16 <= qw4[ax15]:
+                            qw4[ax15] = max(ax16, 0)
+                            changed = True
+                    if changed:
+                        block_modified = True
+        if block_modified:
+            print("已删除")
+    # -----------
+    # qw5
+    for i, ax14 in ax12:
+        cx = i % 32
+        cy = i // 32
+        block_modified = False
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 > ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 32:
+                    ax15 = ny * 32 + nx
+                    ax16 = -(ax14 - ax13)
+                    changed = False
+                    if isinstance(qw5[ax15], Point):
+                        if ax16 <= qw5[ax15].brightness:
+                            qw5[ax15].brightness = max(ax16, 0)
+                            changed = True
+                    else:
+                        if ax16 <= qw5[ax15]:
+                            qw5[ax15] = max(ax16, 0)
+                            changed = True
+                    if changed:
+                        block_modified = True
+        if block_modified:
+            print("已删除")
+    # -----------
+ 
+    # ----------------打印显示逻辑------------
+    print("======区块一==========")
+    for i in range(0, 32*32, 32):
+            row = []
+            for j in range(i, i+32):
+                if isinstance(qw1[j], Point):
+                    row.append(str(qw1[j].brightness))
+                else:
+                    row.append(str(qw1[j]))
+            print(' '.join(row))
+    print("\n==========区块2==========")
+    for i in range(0, 32*32, 32):
+            row = []
+            for j in range(i, i+32):
+                if isinstance(qw2[j], Point):
+                    row.append(str(qw2[j].brightness))
+                else:
+                    row.append(str(qw2[j]))
+            print(' '.join(row))
+    print("\n==========区块3==========")
+    for i in range(0, 32*32, 32):
+            row = []
+            for j in range(i, i+32):
+                if isinstance(qw3[j], Point):
+                    row.append(str(qw3[j].brightness))
+                else:
+                    row.append(str(qw3[j]))
+            print(' '.join(row))
+    print("\n========== 区块4 ==========")
+    for i in range(0, 32*32, 32):
+                row = []
+                for j in range(i, i+32):
+                    if isinstance(qw4[j], Point):
+                        row.append(str(qw4[j].brightness))
+                    else:
+                        row.append(str(qw4[j]))
+                print(' '.join(row))
+    print("\n========== 区块5 ==========")
+    for i in range(0, 32*32, 32):
+                row = []
+                for j in range(i, i+32):
+                    if isinstance(qw5[j], Point):
+                        row.append(str(qw5[j].brightness))
+                    else:
+                        row.append(str(qw5[j]))
+                print(' '.join(row))
