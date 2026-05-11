@@ -31,8 +31,16 @@ ax14 = 0
 ax15 = 0
 ax16 = 0
 ax17 = False
+ax18 = 0
 qw1[400] = Point(center_index=400, brightness=9)
 qw1[399] = Point(center_index=390, brightness=9)
+
+
+
+
+
+
+
 while True:
     # 修改1：每次循环开始清空所有待处理列表，防止累积
     ax8.clear()
@@ -53,7 +61,14 @@ while True:
         ax6.append(ax5)# 暂存二进制
     # 随机池
     for i in range(len(ax6)):
-        ax7.append(ax6[i][:8])
+        ax18 = list[ax6[i]]
+        ax7.append(ax18[0] + ax18[1] + ax18[2] + ax18[3])
+        ax7.append(ax18[4] + ax18[5] + ax18[6] + ax18[7])
+        ax7.append(ax18[8] + ax18[9] + ax18[10] + ax18[11])
+        ax7.append(ax18[12] + ax18[13] + ax18[14] + ax18[15])
+        ax7.append(ax18[16] + ax18[17] + ax18[18] + ax18[19])
+        ax7.append(ax18[20] + ax18[21] + ax18[22] + ax18[23])
+    
     # 遍历整个列表，找所有brightness == 9的Point实例
     for i in range(len(qw1)):
         if isinstance(qw1[i], Point):
@@ -217,8 +232,9 @@ while True:
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:
-            print("已删除")
+        if block_modified:# ax8
+            qw1[ax8[1]] =
+
     # -----------
     # qw2
     for i, ax14 in ax9:
