@@ -240,22 +240,117 @@ while True:
             if i < ax8:
                 if ax7[i] == 1:# 上 
                     if isinstance(qw1[ax15 + 23], Point):# 连接逻辑看是否适合连接
-                        if qw1[i].brightness == 9:# 检查他是否为一个类
+                        if qw1[ax15 + 23].brightness < 9:# 检查他是否为一个类
+                            ax20 = 0# 控制 输入 输出
+                            if len(qw1[ax15 + 23].asd) < 9:
+                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:# 因为是向上，所以应该是输入
+                                qw1[ax15] = Point(
+                                    asd.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 + 23
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
+                                # 对方的也要记录
+                                qw1[ax15 + 23] = Point(
+                                    asd2.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 + 23
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
                         
                 if ax7[i] == 1:# 下
-                    pass
+                    if isinstance(qw1[ax15 - 23], Point):# 连接逻辑看是否适合连接
+                        if qw1[ax15 - 23].brightness < 9:# 检查他是否为一个类
+                            ax20 = 0# 控制 输入 输出
+                            if len(qw1[ax15 - 23].asd) < 9:
+                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:# 因为是向上，所以应该是输入
+                                qw1[ax15] = Point(
+                                    asd.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 - 23
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
+                                # 对方的也要记录
+                                qw1[ax15 - 23] = Point(
+                                    asd2.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 - 23
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
                 if ax7[i] == 1:# 左
-                    pass
+                    if isinstance(qw1[ax15 - 1], Point):# 连接逻辑看是否适合连接
+                        if qw1[ax15 - 1].brightness < 9:# 检查他是否为一个类
+                            ax20 = 0# 控制 输入 输出
+                            if len(qw1[ax15 - 1].asd) < 9:
+                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:# 因为是向上，所以应该是输入
+                                qw1[ax15] = Point(
+                                    asd.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 - 1
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
+                                # 对方的也要记录
+                                qw1[ax15 - 1] = Point(
+                                    asd2.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 - 1
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
                 if ax7[i] == 1:# 右
-                    pass
-        
-            if ax15   > ax18:
-                pass 
-            else:
-
-            qw1[ax8]
-            
-
+                    if isinstance(qw1[ax15 + 1], Point):# 连接逻辑看是否适合连接
+                        if qw1[ax15 + 1].brightness < 9:# 检查他是否为一个类
+                            ax20 = 0# 控制 输入 输出
+                            if len(qw1[ax15 + 1].asd) < 9:
+                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:# 因为是向上，所以应该是输入
+                                qw1[ax15] = Point(
+                                    asd.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 + 1
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
+                                # 对方的也要记录
+                                qw1[ax15 + 1] = Point(
+                                    asd2.append = (
+                                        {
+                                            "b" : "qw1",
+                                            "i" : qw1[i].brightness
+                                            "a1" : ax15
+                                            "a3" : ax15 + 1
+                                        }
+                                        )# 区块；Block:b，强度：Intensity:i
+                                    )
     # -----------
     # qw2
     for i, ax14 in ax9:
