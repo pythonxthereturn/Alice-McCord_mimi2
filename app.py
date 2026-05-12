@@ -249,7 +249,7 @@ while True:
                                     asd.append = (
                                         {
                                             "b" : "qw1",
-                                            "i" : qw1[i].brightness
+                                            "i" : qw1[ax15 + 23].brightness
                                             "a1" : ax15
                                             "a3" : ax15 + 23
                                         }
@@ -278,7 +278,7 @@ while True:
                                     asd.append = (
                                         {
                                             "b" : "qw1",
-                                            "i" : qw1[i].brightness
+                                            "i" : qw1[ax15 - 23].brightness
                                             "a1" : ax15
                                             "a3" : ax15 - 23
                                         }
@@ -306,7 +306,7 @@ while True:
                                     asd.append = (
                                         {
                                             "b" : "qw1",
-                                            "i" : qw1[i].brightness
+                                            "i" : qw1[ax15 - 1].brightness
                                             "a1" : ax15
                                             "a3" : ax15 - 1
                                         }
@@ -334,7 +334,7 @@ while True:
                                     asd.append = (
                                         {
                                             "b" : "qw1",
-                                            "i" : qw1[i].brightness
+                                            "i" : qw1[ax15 + 1].brightness
                                             "a1" : ax15
                                             "a3" : ax15 + 1
                                         }
