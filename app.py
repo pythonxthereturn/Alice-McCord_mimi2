@@ -32,6 +32,7 @@ ax15 = 0
 ax16 = 0
 ax17 = False
 ax18 = 0
+ax19 = 0
 qw1[400] = Point(center_index=400, brightness=9)
 qw1[399] = Point(center_index=390, brightness=9)
 
@@ -68,6 +69,7 @@ while True:
         ax7.append(ax18[12] + ax18[13] + ax18[14] + ax18[15])
         ax7.append(ax18[16] + ax18[17] + ax18[18] + ax18[19])
         ax7.append(ax18[20] + ax18[21] + ax18[22] + ax18[23])
+        ax18 =+ 1
     
     # 遍历整个列表，找所有brightness == 9的Point实例
     for i in range(len(qw1)):
@@ -232,8 +234,27 @@ while True:
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:# ax8
-            qw1[ax8[1]] =
+        if block_modified:# ax8 ax18 ax7
+            # 上下左右
+            # 1 2 3 4
+            if i < ax8:
+                if ax7[i] == 1:# 上 
+                    if isinstance(qw1[ax15 + 23], Point):# 连接逻辑看是否适合连接
+                        if qw1[i].brightness == 9:# 检查他是否为一个类
+                        
+                if ax7[i] == 1:# 下
+                    pass
+                if ax7[i] == 1:# 左
+                    pass
+                if ax7[i] == 1:# 右
+                    pass
+        
+            if ax15   > ax18:
+                pass 
+            else:
+
+            qw1[ax8]
+            
 
     # -----------
     # qw2
