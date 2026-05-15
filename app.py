@@ -234,129 +234,177 @@ while True:
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:# ax8 ax18 ax7
+        if block_modified:  # ax8 ax18 ax7
             # 上下左右
             # 1 2 3 4
-            if i < ax8:
-                if ax7[i] == 1:# 上 
-                    if isinstance(qw1[ax15 + 23], Point):# 连接逻辑看是否适合连接
-                        if qw1[ax15 + 23].brightness < 9:# 检查他是否为一个类
-                            ax20 = 0# 控制 输入 输出
-                            if len(qw1[ax15 + 23].asd) < 9:
-                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
-                            else:# 因为是向上，所以应该是输入
-                                qw1[ax15] = Point(
-                                    asd.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[ax15 + 23].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 + 23
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-                                # 对方的也要记录
-                                qw1[ax15 + 23] = Point(
-                                    asd2.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[i].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 + 23
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
+            if ax7[i] == 1:  # 上
+                target_idx = i + 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw1[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw1[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw1[i].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw1[target_idx].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
                         
-                if ax7[i] == 1:# 下
-                    if isinstance(qw1[ax15 - 23], Point):# 连接逻辑看是否适合连接
-                        if qw1[ax15 - 23].brightness < 9:# 检查他是否为一个类
-                            ax20 = 0# 控制 输入 输出
-                            if len(qw1[ax15 - 23].asd) < 9:
-                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
-                            else:# 因为是向上，所以应该是输入
-                                qw1[ax15] = Point(
-                                    asd.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[ax15 - 23].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 - 23
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-                                # 对方的也要记录
-                                qw1[ax15 - 23] = Point(
-                                    asd2.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[i].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 - 23
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-                if ax7[i] == 1:# 左
-                    if isinstance(qw1[ax15 - 1], Point):# 连接逻辑看是否适合连接
-                        if qw1[ax15 - 1].brightness < 9:# 检查他是否为一个类
-                            ax20 = 0# 控制 输入 输出
-                            if len(qw1[ax15 - 1].asd) < 9:
-                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
-                            else:# 因为是向上，所以应该是输入
-                                qw1[ax15] = Point(
-                                    asd.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[ax15 - 1].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 - 1
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-                                # 对方的也要记录
-                                qw1[ax15 - 1] = Point(
-                                    asd2.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[i].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 - 1
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-                if ax7[i] == 1:# 右
-                    if isinstance(qw1[ax15 + 1], Point):# 连接逻辑看是否适合连接
-                        if qw1[ax15 + 1].brightness < 9:# 检查他是否为一个类
-                            ax20 = 0# 控制 输入 输出
-                            if len(qw1[ax15 + 1].asd) < 9:
-                                pass#  1   2    3 类型对方的也要记录时前面加上个a1
-                            else:# 因为是向上，所以应该是输入
-                                qw1[ax15] = Point(
-                                    asd.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[ax15 + 1].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 + 1
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-                                # 对方的也要记录
-                                qw1[ax15 + 1] = Point(
-                                    asd2.append = (
-                                        {
-                                            "b" : "qw1",
-                                            "i" : qw1[i].brightness
-                                            "a1" : ax15
-                                            "a3" : ax15 + 1
-                                        }
-                                        )# 区块；Block:b，强度：Intensity:i
-                                    )
-    # -----------
-    # qw2
-    for i, ax14 in ax9:
+            if ax7[i] == 1:  # 下
+                target_idx = i - 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw1[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw1[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw1[i].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw1[target_idx].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 左
+                target_idx = i - 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw1[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw1[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw1[i].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw1[target_idx].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 右
+                target_idx = i + 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw1[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw1[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw1[i].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw1[target_idx].asd2.append({
+                                    "b": "qw1",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+    # 预加载qw2
+    for i, _ in ax9:
         cx = i % 32
         cy = i // 32
-        block_modified = False
+        ax14 = qw2[i].brightness
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 >= ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 3:
+                    ax15 = ny * 32 + nx
+                    ax16 = ax14 - ax13
+                    if isinstance(qw2[ax15], Point):
+                        if ax16 > qw2[ax15].brightness:
+                            qw2[ax15].brightness = min(ax16, 9)
+                    else:
+                        if ax16 > qw2[ax15]:
+                            qw2[ax15] = min(ax16, 9)
+    # -----------
+    # qw2
+    for i, ax14 in ax9:  # 直接使用保存的原始亮度
+        cx = i % 32
+        cy = i // 32
+        block_modified = False  # 每个区块开头重新初始化，绝对独立
         for dy in range(-ax14, ax14 + 1):
             for dx in range(-ax14, ax14 + 1):
                 ax13 = abs(dx) + abs(dy)
@@ -369,23 +417,188 @@ while True:
                     ax16 = -(ax14 - ax13)
                     changed = False
                     if isinstance(qw2[ax15], Point):
+                        # 修改3：把 < 改成 <=，彻底清除残留的1
                         if ax16 <= qw2[ax15].brightness:
                             qw2[ax15].brightness = max(ax16, 0)
                             changed = True
                     else:
+                        # 同样改成 <=
                         if ax16 <= qw2[ax15]:
                             qw2[ax15] = max(ax16, 0)
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:
-            print("已删除")
-    # -----------
-    # qw3
-    for i, ax14 in ax10:
+        if block_modified:  # ax8 ax18 ax7
+            # 上下左右
+            # 1 2 3 4
+            if ax7[i] == 1:  # 上
+                target_idx = i + 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw2[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw2[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw2[i].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw2[target_idx].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+                        
+            if ax7[i] == 1:  # 下
+                target_idx = i - 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw2[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw2[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw2[i].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw2[target_idx].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 左
+                target_idx = i - 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw2[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw2[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw2[i].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw2[target_idx].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 右
+                target_idx = i + 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw2[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw2[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw2[i].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw2[target_idx].asd2.append({
+                                    "b": "qw2",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+    # 预加载qw3
+    for i, _ in ax10:
         cx = i % 32
         cy = i // 32
-        block_modified = False
+        ax14 = qw3[i].brightness
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 >= ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 3:
+                    ax15 = ny * 32 + nx
+                    ax16 = ax14 - ax13
+                    if isinstance(qw3[ax15], Point):
+                        if ax16 > qw3[ax15].brightness:
+                            qw3[ax15].brightness = min(ax16, 9)
+                    else:
+                        if ax16 > qw3[ax15]:
+                            qw3[ax15] = min(ax16, 9)
+    # -----------
+    # qw3
+    for i, ax14 in ax10:  # 直接使用保存的原始亮度
+        cx = i % 32
+        cy = i // 32
+        block_modified = False  # 每个区块开头重新初始化，绝对独立
         for dy in range(-ax14, ax14 + 1):
             for dx in range(-ax14, ax14 + 1):
                 ax13 = abs(dx) + abs(dy)
@@ -398,23 +611,188 @@ while True:
                     ax16 = -(ax14 - ax13)
                     changed = False
                     if isinstance(qw3[ax15], Point):
+                        # 修改3：把 < 改成 <=，彻底清除残留的1
                         if ax16 <= qw3[ax15].brightness:
                             qw3[ax15].brightness = max(ax16, 0)
                             changed = True
                     else:
+                        # 同样改成 <=
                         if ax16 <= qw3[ax15]:
                             qw3[ax15] = max(ax16, 0)
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:
-            print("已删除")
-    # -----------
-    # qw4
-    for i, ax14 in ax11:
+        if block_modified:  # ax8 ax18 ax7
+            # 上下左右
+            # 1 2 3 4
+            if ax7[i] == 1:  # 上
+                target_idx = i + 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw3[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw3[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw3[i].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw3[target_idx].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+                        
+            if ax7[i] == 1:  # 下
+                target_idx = i - 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw3[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw3[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw3[i].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw3[target_idx].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 左
+                target_idx = i - 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw3[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw3[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw3[i].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw3[target_idx].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 右
+                target_idx = i + 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw3[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw3[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw3[i].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw3[target_idx].asd2.append({
+                                    "b": "qw3",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+    # 预加载qw4
+    for i, _ in ax11:
         cx = i % 32
         cy = i // 32
-        block_modified = False
+        ax14 = qw4[i].brightness
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 >= ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 3:
+                    ax15 = ny * 32 + nx
+                    ax16 = ax14 - ax13
+                    if isinstance(qw4[ax15], Point):
+                        if ax16 > qw4[ax15].brightness:
+                            qw4[ax15].brightness = min(ax16, 9)
+                    else:
+                        if ax16 > qw4[ax15]:
+                            qw4[ax15] = min(ax16, 9)
+    # -----------
+    # qw4
+    for i, ax14 in ax11:  # 直接使用保存的原始亮度
+        cx = i % 32
+        cy = i // 32
+        block_modified = False  # 每个区块开头重新初始化，绝对独立
         for dy in range(-ax14, ax14 + 1):
             for dx in range(-ax14, ax14 + 1):
                 ax13 = abs(dx) + abs(dy)
@@ -427,23 +805,188 @@ while True:
                     ax16 = -(ax14 - ax13)
                     changed = False
                     if isinstance(qw4[ax15], Point):
+                        # 修改3：把 < 改成 <=，彻底清除残留的1
                         if ax16 <= qw4[ax15].brightness:
                             qw4[ax15].brightness = max(ax16, 0)
                             changed = True
                     else:
+                        # 同样改成 <=
                         if ax16 <= qw4[ax15]:
                             qw4[ax15] = max(ax16, 0)
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:
-            print("已删除")
-    # -----------
-    # qw5
-    for i, ax14 in ax12:
+        if block_modified:  # ax8 ax18 ax7
+            # 上下左右
+            # 1 2 3 4
+            if ax7[i] == 1:  # 上
+                target_idx = i + 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw4[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw4[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw4[i].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw4[target_idx].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+                        
+            if ax7[i] == 1:  # 下
+                target_idx = i - 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw4[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw4[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw4[i].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw4[target_idx].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 左
+                target_idx = i - 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw4[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw4[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw4[i].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw4[target_idx].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 右
+                target_idx = i + 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw4[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw4[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw4[i].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw4[target_idx].asd2.append({
+                                    "b": "qw4",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+    # 预加载qw5
+    for i, _ in ax12:
         cx = i % 32
         cy = i // 32
-        block_modified = False
+        ax14 = qw5[i].brightness
+        for dy in range(-ax14, ax14 + 1):
+            for dx in range(-ax14, ax14 + 1):
+                ax13 = abs(dx) + abs(dy)
+                if ax13 >= ax14:
+                    continue
+                nx = cx + dx
+                ny = cy + dy
+                if 0 <= nx < 32 and 0 <= ny < 3:
+                    ax15 = ny * 32 + nx
+                    ax16 = ax14 - ax13
+                    if isinstance(qw5[ax15], Point):
+                        if ax16 > qw5[ax15].brightness:
+                            qw5[ax15].brightness = min(ax16, 9)
+                    else:
+                        if ax16 > qw5[ax15]:
+                            qw5[ax15] = min(ax16, 9)
+    # -----------
+    # qw5
+    for i, ax14 in ax12:  # 直接使用保存的原始亮度
+        cx = i % 32
+        cy = i // 32
+        block_modified = False  # 每个区块开头重新初始化，绝对独立
         for dy in range(-ax14, ax14 + 1):
             for dx in range(-ax14, ax14 + 1):
                 ax13 = abs(dx) + abs(dy)
@@ -456,17 +999,161 @@ while True:
                     ax16 = -(ax14 - ax13)
                     changed = False
                     if isinstance(qw5[ax15], Point):
+                        # 修改3：把 < 改成 <=，彻底清除残留的1
                         if ax16 <= qw5[ax15].brightness:
                             qw5[ax15].brightness = max(ax16, 0)
                             changed = True
                     else:
+                        # 同样改成 <=
                         if ax16 <= qw5[ax15]:
                             qw5[ax15] = max(ax16, 0)
                             changed = True
                     if changed:
                         block_modified = True
-        if block_modified:
-            print("已删除")
+        if block_modified:  # ax8 ax18 ax7
+            # 上下左右
+            # 1 2 3 4
+            if ax7[i] == 1:  # 上
+                target_idx = i + 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw5[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw5[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw5[i].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw5[target_idx].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+                        
+            if ax7[i] == 1:  # 下
+                target_idx = i - 32
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw5[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw5[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw5[i].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw5[target_idx].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 左
+                target_idx = i - 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw5[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw5[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw5[i].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw5[target_idx].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
+            if ax7[i] == 1:  # 右
+                target_idx = i + 1
+                if 0 <= target_idx < 1024:
+                    if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
+                        if qw5[target_idx].brightness < 9:  # 检查他是否为一个类
+                            ax20 = 0  # 控制 输入 输出
+                            if len(qw5[target_idx].asd) < 9:
+                                pass  #  1   2    3 类型对方的也要记录时前面加上个a1
+                            else:  # 因为是向上，所以应该是输入        
+                                ax21 = 0                   
+                                for a in range(3):
+                                    if ax7[i + a] < 4:
+                                        ax21 += 1
+                                    elif a == 3:
+                                        break
+                                    if ax21 == 1:
+                                        ax21 = "a1"
+                                    elif ax21 == 2:
+                                        ax21 = "a2"
+                                    elif ax21 == 3:
+                                        ax21 = "a3"
+                                qw5[i].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": i,
+                                    "a3": target_idx,
+                                    "signal": 0
+                                })
+                                qw5[target_idx].asd2.append({
+                                    "b": "qw5",
+                                    "i": ax21,
+                                    "a1": target_idx,
+                                    "a3": i,
+                                    "signal": 0
+                                })
     # -----------
  
     # ----------------打印显示逻辑------------
