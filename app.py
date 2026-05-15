@@ -31,7 +31,7 @@ ax14 = 0
 ax15 = 0
 ax16 = 0
 ax17 = False
-ax18 = 0
+ax18 = []
 ax19 = 0
 qw1[400] = Point(center_index=400, brightness=9)
 qw1[399] = Point(center_index=390, brightness=9)
@@ -54,6 +54,9 @@ while True:
     
     ax1 = input("input:")
     ax2 = list(ax1)
+    ax6 = []
+    ax7 = []
+
     for i in ax2:
         ax3 = i.encode("utf-8")# 转化为uTF-8
         ax4 = ''.join(f'{byte:08b}' for byte in ax3)# 转化为二进制
@@ -62,14 +65,15 @@ while True:
         ax6.append(ax5)# 暂存二进制
     # 随机池
     for i in range(len(ax6)):
-        ax18 = list[ax6[i]]
-        ax7.append(ax18[0] + ax18[1] + ax18[2] + ax18[3])
-        ax7.append(ax18[4] + ax18[5] + ax18[6] + ax18[7])
-        ax7.append(ax18[8] + ax18[9] + ax18[10] + ax18[11])
-        ax7.append(ax18[12] + ax18[13] + ax18[14] + ax18[15])
-        ax7.append(ax18[16] + ax18[17] + ax18[18] + ax18[19])
-        ax7.append(ax18[20] + ax18[21] + ax18[22] + ax18[23])
-        ax18 =+ 1
+        ax18 = ax6[i]
+        ax7.append(int(ax18[int(0)]) + int(ax18[1]) + int(ax18[2]) + int(ax18[3]))
+        ax7.append(int(ax18[4]) + int(ax18[5]) + int(ax18[6]) + int(ax18[7]))
+        ax7.append(int(ax18[8]) + int(ax18[9]) + int(ax18[10]) + int(ax18[11]))
+        ax7.append(int(ax18[12]) + int(ax18[13]) + int(ax18[14]) + int(ax18[15]))
+        ax7.append(int(ax18[16]) + int(ax18[17]) + int(ax18[18]) + int(ax18[19]))
+        ax7.append(int(ax18[20]) + int(ax18[21]) + int(ax18[22]) + int(ax18[23]))
+
+    print("最终ax7数值列表：",ax7)
     
     # 遍历整个列表，找所有brightness == 9的Point实例
     for i in range(len(qw1)):
@@ -237,7 +241,7 @@ while True:
         if block_modified:  # ax8 ax18 ax7
             # 上下左右
             # 1 2 3 4
-            if ax7[i] == 1:  # 上
+            if i < len(ax7) and ax7[int(i)] == 1:  # 上
                 target_idx = i + 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -248,7 +252,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -273,7 +277,7 @@ while True:
                                     "signal": 0
                                 })
                         
-            if ax7[i] == 1:  # 下
+            if i < len(ax7) and ax7[i] == 1:  # 下
                 target_idx = i - 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -284,7 +288,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -308,7 +312,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 左
+            if i < len(ax7) and ax7[i] == 1:  # 左
                 target_idx = i - 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -319,7 +323,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -343,7 +347,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 右
+            if i < len(ax7) and ax7[i] == 1:  # 右
                 target_idx = i + 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw1[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -354,7 +358,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -431,7 +435,7 @@ while True:
         if block_modified:  # ax8 ax18 ax7
             # 上下左右
             # 1 2 3 4
-            if ax7[i] == 1:  # 上
+            if i < len(ax7) and ax7[i] == 1:  # 上
                 target_idx = i + 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -442,7 +446,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -467,7 +471,7 @@ while True:
                                     "signal": 0
                                 })
                         
-            if ax7[i] == 1:  # 下
+            if i < len(ax7) and ax7[i] == 1:  # 下
                 target_idx = i - 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -478,7 +482,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -502,7 +506,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 左
+            if i < len(ax7) and ax7[i] == 1:  # 左
                 target_idx = i - 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -513,7 +517,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -537,7 +541,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 右
+            if i < len(ax7) and ax7[i] == 1:  # 右
                 target_idx = i + 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw2[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -548,7 +552,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -625,7 +629,7 @@ while True:
         if block_modified:  # ax8 ax18 ax7
             # 上下左右
             # 1 2 3 4
-            if ax7[i] == 1:  # 上
+            if i < len(ax7) and ax7[i] == 1:  # 上
                 target_idx = i + 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -636,7 +640,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -661,7 +665,7 @@ while True:
                                     "signal": 0
                                 })
                         
-            if ax7[i] == 1:  # 下
+            if i < len(ax7) and ax7[i] == 1:  # 下
                 target_idx = i - 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -672,7 +676,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -696,7 +700,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 左
+            if i < len(ax7) and ax7[i] == 1:  # 左
                 target_idx = i - 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -707,7 +711,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -731,7 +735,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 右
+            if i < len(ax7) and ax7[i] == 1:  # 右
                 target_idx = i + 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw3[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -742,7 +746,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -819,7 +823,7 @@ while True:
         if block_modified:  # ax8 ax18 ax7
             # 上下左右
             # 1 2 3 4
-            if ax7[i] == 1:  # 上
+            if i < len(ax7) and ax7[i] == 1:  # 上
                 target_idx = i + 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -830,7 +834,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -855,7 +859,7 @@ while True:
                                     "signal": 0
                                 })
                         
-            if ax7[i] == 1:  # 下
+            if i < len(ax7) and ax7[i] == 1:  # 下
                 target_idx = i - 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -866,7 +870,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -890,7 +894,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 左
+            if i < len(ax7) and ax7[i] == 1:  # 左
                 target_idx = i - 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -901,7 +905,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -925,7 +929,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 右
+            if i < len(ax7) and ax7[i] == 1:  # 右
                 target_idx = i + 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw4[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -936,7 +940,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -1013,7 +1017,7 @@ while True:
         if block_modified:  # ax8 ax18 ax7
             # 上下左右
             # 1 2 3 4
-            if ax7[i] == 1:  # 上
+            if i < len(ax7) and ax7[i] == 1:  # 上
                 target_idx = i + 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -1024,7 +1028,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -1049,7 +1053,7 @@ while True:
                                     "signal": 0
                                 })
                         
-            if ax7[i] == 1:  # 下
+            if i < len(ax7) and ax7[i] == 1:  # 下
                 target_idx = i - 32
                 if 0 <= target_idx < 1024:
                     if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -1060,7 +1064,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -1084,7 +1088,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 左
+            if i < len(ax7) and ax7[i] == 1:  # 左
                 target_idx = i - 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -1095,7 +1099,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
@@ -1119,7 +1123,7 @@ while True:
                                     "a3": i,
                                     "signal": 0
                                 })
-            if ax7[i] == 1:  # 右
+            if i < len(ax7) and ax7[i] == 1:  # 右
                 target_idx = i + 1
                 if 0 <= target_idx < 1024:
                     if isinstance(qw5[target_idx], Point):  # 连接逻辑看是否适合连接
@@ -1130,7 +1134,7 @@ while True:
                             else:  # 因为是向上，所以应该是输入        
                                 ax21 = 0                   
                                 for a in range(3):
-                                    if ax7[i + a] < 4:
+                                    if i + a < len(ax7) and ax7[i + a] < 4:
                                         ax21 += 1
                                     elif a == 3:
                                         break
