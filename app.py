@@ -1,22 +1,39 @@
 ﻿# -*- coding: utf-8 -*-
 #!C:/Users/Administrator/Desktop/Alice McCord/app.py python3
-import inspect
+
+# ===========================================================================
+# Global Constants
+# ===========================================================================
+GRID_SIDE_LENGTH = 32
+TOTAL_CELLS = 1024
+MAX_BRIGHTNESS = 9
+ACTIVE_BRIGHTNESS = 9
+SEED_BRIGHTNESS = 4
+MAX_PORTS_PER_TYPE = 9
+API_PORT_COUNT = 32
+CONTROL_SIGNAL_THRESHOLD = 1
+BINARY_GROUP_BITS = 4
+RANDOM_POOL_GROUPS = 7
 
 
 # ===========================================================================
-# Point 类定义
+# Point Class
 # ===========================================================================
 class Point:
-    """32×32网格中的节点类，包含亮度值和三种端口列表。
+    """32x32 grid node class.
 
-    属性:
-        center_index: 该Point在网格中的扁平索引（0~1023）
-        brightness: 当前亮度值（0~9），9为最亮/活跃状态
-        control_ports: 控制端口连接列表，每个连接为dict
-        input_ports: 输入端口连接列表，每个连接为dict
-        output_ports: 输出端口连接列表，每个连接为dict
+    Attributes:
+        center_index: flat index within grid (0 ~ TOTAL_CELLS-1)
+        brightness: current brightness value (0 ~ MAX_BRIGHTNESS)
+        control_ports: list of connection dictionaries
+        input_ports: list of connection dictionaries
+        output_ports: list of connection dictionaries
     """
-    def __init__(self, center_index, brightness, control_ports=None, input_ports=None, output_ports=None):
+
+    def __init__(self, center_index: int, brightness: int,
+                 control_ports: list | None = None,
+                 input_ports: list | None = None,
+                 output_ports: list | None = None):
         self.center_index = center_index
         self.brightness = brightness
         self.control_ports = [] if control_ports is None else control_ports
@@ -25,19 +42,21 @@ class Point:
 
 
 # ===========================================================================
-# 工具函数
+# Utility Functions
 # ===========================================================================
-def build_random_pool(binary_string_list):
-    """根据二进制字符串列表构建随机池。
+def build_random_pool(binary_string_list: list) -> list:
+    """Build a random pool from a list of 32-bit binary strings.
 
-    将每个32位二进制字符串按4位一组拆分为6组，
-    每组4位求和得到一个0~4的整数，存入随机池。
+    Takes the first RANDOM_POOL_GROUPS * BINARY_GROUP_BITS = 28 bits
+    from each binary string, splits into groups of BINARY_GROUP_BITS bits,
+    and sums each group to produce an integer in 0~4.
 
-    参数:
-        binary_string_list: 二进制字符串列表，每个字符串长度为32
+    Args:
+        binary_string_list: list of binary strings, each of length
+                            GRID_SIDE_LENGTH (32)
 
-    返回:
-        list: 随机池，包含若干个0~4的整数
+    Returns:
+        list: random pool containing integers in range 0~4
     """
     random_pool = []
     for i in range(len(binary_string_list)):
@@ -48,30 +67,37 @@ def build_random_pool(binary_string_list):
         random_pool.append(int(current_binary_string[12]) + int(current_binary_string[13]) + int(current_binary_string[14]) + int(current_binary_string[15]))
         random_pool.append(int(current_binary_string[16]) + int(current_binary_string[17]) + int(current_binary_string[18]) + int(current_binary_string[19]))
         random_pool.append(int(current_binary_string[20]) + int(current_binary_string[21]) + int(current_binary_string[22]) + int(current_binary_string[23]))
+        random_pool.append(int(current_binary_string[24]) + int(current_binary_string[25]) + int(current_binary_string[26]) + int(current_binary_string[27]))
     return random_pool
 
 
-def detect_active_points(grid):
-    """检测网格中所有亮度为9的活跃Point。
+def detect_active_points(grid: list) -> list:
+    """Detect all active Points with brightness equal to ACTIVE_BRIGHTNESS.
 
-    遍历整个网格，找到所有isinstance为Point且brightness==9的元素，
-    返回其索引和亮度值的元组列表。
+    Args:
+        grid: list of length TOTAL_CELLS
 
-    参数:
-        grid: 长度为1024的网格列表
-
-    返回:
-        list: [(point_index, brightness), ...] 活跃点列表
+    Returns:
+        list: [(point_index, brightness), ...] for Points where
+              brightness == ACTIVE_BRIGHTNESS
     """
     active_points = []
     for i in range(len(grid)):
         if isinstance(grid[i], Point):
-            if grid[i].brightness == 9:
+            if grid[i].brightness == ACTIVE_BRIGHTNESS:
                 active_points.append((i, grid[i].brightness))
     return active_points
 
 
-def detect_all_points(grid):
+def detect_all_points(grid: list) -> list:
+    """Detect all Point objects in the grid regardless of brightness.
+
+    Args:
+        grid: list of length TOTAL_CELLS
+
+    Returns:
+        list: [(point_index, brightness), ...] for every Point in the grid
+    """
     all_points = []
     for i in range(len(grid)):
         if isinstance(grid[i], Point):
@@ -79,7 +105,52 @@ def detect_all_points(grid):
     return all_points
 
 
-def determine_movement_direction(grid, point_index):
+def update_connections_after_move(grid: list, grid_name: str,
+                                   old_index: int, new_index: int) -> None:
+    """Update all port connection references after a Point moves.
+
+    Traverses every Point in the grid and updates any connection entry
+    whose source_point_index or target_point_index references the old
+    index to point to the new index.
+
+    Args:
+        grid: list of length TOTAL_CELLS
+        grid_name: name string of the grid layer, e.g. "grid_layer_1"
+        old_index: the index the Point moved from
+        new_index: the index the Point moved to
+    """
+    for i in range(len(grid)):
+        if isinstance(grid[i], Point):
+            point = grid[i]
+            for port_list in [point.control_ports, point.input_ports, point.output_ports]:
+                for connection in port_list:
+                    if connection.get("source_point_index") == old_index:
+                        connection["source_point_index"] = new_index
+                    if connection.get("target_point_index") == old_index:
+                        connection["target_point_index"] = new_index
+
+
+def determine_movement_direction(grid: list, point_index: int) -> int:
+    """Determine the movement direction for a Point based on neighbor signals.
+
+    Compares the Point's own brightness against the signal strength
+    of its four orthogonal neighbors. A neighbor's signal is the
+    numeric value stored at that cell (only empty cells are considered
+    since occupied cells cannot be moved into).
+    The direction with the highest neighbor signal is chosen.
+    Movement occurs only if the highest neighbor signal exceeds the
+    Point's own brightness.
+
+    Priority for equal signals: down > right > up > left.
+
+    Args:
+        grid: list of length TOTAL_CELLS
+        point_index: flat index of the Point to evaluate
+
+    Returns:
+        int: target index to move to, or -1 if no move should occur
+    """
+    self_brightness = grid[point_index].brightness
     direction_offsets = [
         ("down", 32),
         ("right", 1),
@@ -87,76 +158,35 @@ def determine_movement_direction(grid, point_index):
         ("left", -1),
     ]
     candidates = []
-    for dir_name, offset in direction_offsets:
-        target_idx = point_index + offset
-        if target_idx < 0 or target_idx >= 1024:
+    for direction_name, offset in direction_offsets:
+        target_index = point_index + offset
+        if target_index < 0 or target_index >= TOTAL_CELLS:
             continue
-        if dir_name == "left" and point_index % 32 == 0:
+        if direction_name == "left" and point_index % GRID_SIDE_LENGTH == 0:
             continue
-        if dir_name == "right" and point_index % 32 == 31:
+        if direction_name == "right" and point_index % GRID_SIDE_LENGTH == GRID_SIDE_LENGTH - 1:
             continue
-        if isinstance(grid[target_idx], Point):
+        if isinstance(grid[target_index], Point):
             continue
-        signal_val = grid[target_idx]
-        candidates.append((signal_val, dir_name, target_idx))
+        neighbor_signal = grid[target_index]
+        candidates.append((neighbor_signal, direction_name, target_index))
     if not candidates:
         return -1
     candidates.sort(key=lambda x: x[0], reverse=True)
     best_signal = candidates[0][0]
-    if best_signal <= 0:
-        return -1
-    return candidates[0][2]
+    if best_signal > self_brightness:
+        return candidates[0][2]
+    return -1
 
 
-def update_connections_after_move(grid, grid_name, old_index, new_index):
-    for i in range(len(grid)):
-        if isinstance(grid[i], Point):
-            point = grid[i]
-            for port_list in [point.control_ports, point.input_ports, point.output_ports]:
-                for conn in port_list:
-                    if conn.get("block_name") == grid_name:
-                        if conn.get("source_point_index") == old_index:
-                            conn["source_point_index"] = new_index
-                        if conn.get("target_point_index") == old_index:
-                            conn["target_point_index"] = new_index
+def clear_non_point_brightness(grid: list) -> list:
+    """Reset all non-Point cells in the grid to zero.
 
+    Args:
+        grid: list of length TOTAL_CELLS
 
-def execute_movement_phase(grid_1, grid_2, grid_3, grid_4, grid_5):
-    grids = [grid_1, grid_2, grid_3, grid_4, grid_5]
-    grid_names = ["grid_1", "grid_2", "grid_3", "grid_4", "grid_5"]
-    for grid_idx in range(len(grids)):
-        grid = grids[grid_idx]
-        grid_name = grid_names[grid_idx]
-        all_points = detect_all_points(grid)
-        moved_to_indices = set()
-        for original_index, _ in all_points:
-            if original_index in moved_to_indices:
-                continue
-            if not isinstance(grid[original_index], Point):
-                continue
-            new_index = determine_movement_direction(grid, original_index)
-            if new_index == -1:
-                continue
-            grid[new_index] = grid[original_index]
-            grid[new_index].center_index = new_index
-            grid[original_index] = 0
-            update_connections_after_move(grid, grid_name, original_index, new_index)
-            moved_to_indices.add(new_index)
-            print(f"[移动] 网格={grid_name}, 旧索引={original_index} -> 新索引={new_index}")
-    return grids[0], grids[1], grids[2], grids[3], grids[4]
-
-
-def clear_non_point_brightness(grid):
-    """将网格中所有非Point对象位置的亮度值清零。
-
-    遍历网格，对于不是Point实例的位置（即存储数字的位置），
-    将其值重置为0。这用于退火后清理残留的数字亮度值。
-
-    参数:
-        grid: 长度为1024的网格列表
-
-    返回:
-        list: 清理后的网格列表
+    Returns:
+        list: the modified grid
     """
     for i in range(len(grid)):
         if not isinstance(grid[i], Point):
@@ -164,24 +194,26 @@ def clear_non_point_brightness(grid):
     return grid
 
 
-def diamond_render_single_point(grid, point_index, source_brightness):
-    """对单个Point执行一次菱形亮度扩散渲染（加法操作）。
+def diamond_render_single_point(grid: list, point_index: int,
+                                 source_brightness: int) -> list:
+    """Perform a single diamond brightness diffusion (additive) from one Point.
 
-    以该Point为中心，向其曼哈顿距离内的所有邻居扩散亮度。
-    亮度值 = source_brightness - 曼哈顿距离。
-    对于Point对象只修改其brightness属性，绝不覆盖Point对象本身。
-    对于非Point位置直接存储计算出的亮度值。
+    Diffuses brightness outward within Manhattan distance < source_brightness.
+    Brightness = source_brightness - Manhattan distance.
+    For Point objects only modifies the brightness attribute, never overwrites
+    the Point object itself. Uses max() for accumulation, capped at
+    MAX_BRIGHTNESS.
 
-    参数:
-        grid: 长度为1024的网格列表
-        point_index: 源Point的扁平索引
-        source_brightness: 源Point的亮度值
+    Args:
+        grid: list of length TOTAL_CELLS
+        point_index: flat index of the source Point
+        source_brightness: brightness value of the source Point
 
-    返回:
-        list: 修改后的网格列表
+    Returns:
+        list: the modified grid
     """
-    column_x = point_index % 32
-    row_y = point_index // 32
+    column_x = point_index % GRID_SIDE_LENGTH
+    row_y = point_index // GRID_SIDE_LENGTH
     for delta_y in range(-source_brightness, source_brightness + 1):
         for delta_x in range(-source_brightness, source_brightness + 1):
             manhattan_distance = abs(delta_x) + abs(delta_y)
@@ -189,40 +221,39 @@ def diamond_render_single_point(grid, point_index, source_brightness):
                 continue
             neighbor_x = column_x + delta_x
             neighbor_y = row_y + delta_y
-            if 0 <= neighbor_x < 32 and 0 <= neighbor_y < 32:
-                target_flat_index = neighbor_y * 32 + neighbor_x
+            if 0 <= neighbor_x < GRID_SIDE_LENGTH and 0 <= neighbor_y < GRID_SIDE_LENGTH:
+                target_flat_index = neighbor_y * GRID_SIDE_LENGTH + neighbor_x
                 computed_brightness = source_brightness - manhattan_distance
                 if isinstance(grid[target_flat_index], Point):
                     if computed_brightness > grid[target_flat_index].brightness:
-                        grid[target_flat_index].brightness = min(computed_brightness, 9)
+                        grid[target_flat_index].brightness = min(computed_brightness, MAX_BRIGHTNESS)
                 else:
                     if computed_brightness > grid[target_flat_index]:
-                        grid[target_flat_index] = min(computed_brightness, 9)
+                        grid[target_flat_index] = min(computed_brightness, MAX_BRIGHTNESS)
     return grid
 
 
 # ===========================================================================
-# 渲染函数
+# Render Function
 # ===========================================================================
-def render_grid(grid, active_points):
-    """对整个网格执行菱形亮度扩散渲染（加法操作）。
+def render_grid(grid: list, active_points: list) -> list:
+    """Perform diamond brightness diffusion for all active Points.
 
-    遍历所有活跃点，以每个活跃点为中心进行菱形扩散。
-    渲染是加法操作：新亮度 = max(原亮度, 计算亮度)。
-    对于Point对象只修改brightness属性，绝不覆盖Point对象为数字。
-    对于非Point位置直接存储计算出的亮度值。
+    Iterates over all active Points and calls diamond_render_single_point
+    for each one. The render is additive: new brightness = max(old, computed),
+    capped at MAX_BRIGHTNESS.
 
-    参数:
-        grid: 长度为1024的网格列表
-        active_points: [(point_index, brightness), ...] 活跃点列表
+    Args:
+        grid: list of length TOTAL_CELLS
+        active_points: list of (point_index, brightness) tuples
 
-    返回:
-        list: 渲染后的网格列表
+    Returns:
+        list: the modified grid
     """
     for point_index, _ in active_points:
         source_brightness = grid[point_index].brightness
-        column_x = point_index % 32
-        row_y = point_index // 32
+        column_x = point_index % GRID_SIDE_LENGTH
+        row_y = point_index // GRID_SIDE_LENGTH
         for delta_y in range(-source_brightness, source_brightness + 1):
             for delta_x in range(-source_brightness, source_brightness + 1):
                 manhattan_distance = abs(delta_x) + abs(delta_y)
@@ -230,56 +261,57 @@ def render_grid(grid, active_points):
                     continue
                 neighbor_x = column_x + delta_x
                 neighbor_y = row_y + delta_y
-                if 0 <= neighbor_x < 32 and 0 <= neighbor_y < 32:
-                    target_flat_index = neighbor_y * 32 + neighbor_x
+                if 0 <= neighbor_x < GRID_SIDE_LENGTH and 0 <= neighbor_y < GRID_SIDE_LENGTH:
+                    target_flat_index = neighbor_y * GRID_SIDE_LENGTH + neighbor_x
                     computed_brightness = source_brightness - manhattan_distance
                     if isinstance(grid[target_flat_index], Point):
                         if computed_brightness > grid[target_flat_index].brightness:
-                            grid[target_flat_index].brightness = min(computed_brightness, 9)
+                            grid[target_flat_index].brightness = min(computed_brightness, MAX_BRIGHTNESS)
                     else:
                         if computed_brightness > grid[target_flat_index]:
-                            grid[target_flat_index] = min(computed_brightness, 9)
+                            grid[target_flat_index] = min(computed_brightness, MAX_BRIGHTNESS)
     return grid
 
 
 # ===========================================================================
-# 退火函数
+# Annealing and Connection Functions
 # ===========================================================================
-def anneal_and_connect(grid, active_points, random_pool, grid_name):
-    """对网格执行退火（减法操作）并建立Point之间的端口连接。
+def anneal_and_connect(grid: list, active_points: list,
+                        random_pool: list, grid_name: str) -> list:
+    """Perform annealing (subtractive) and establish port connections.
 
-    退火是渲染的逆操作：新亮度 = 原亮度 + 计算亮度变化（负值）。
-    退火遍历范围比渲染多一圈（manhattan_distance <= source_brightness），
-    确保完全抵消渲染的影响。
+    Annealing is the inverse of rendering: using subtraction.
+    Range: manhattan_distance <= source_brightness (one more ring than render).
 
-    连接逻辑：
-    - 退火过程中若某个区域被修改，且random_pool条件满足，
-      则在四个方向（上下左右）尝试建立连接。
-    - 分别检查目标Point的control_ports、input_ports、output_ports长度，
-      只有对应类型端口列表长度<9时才建立该类型的双向连接。
-    - 连接信息包含：block_name, port_identifier, source_point_index,
-      target_point_index, signal=0。
-    - 当一个Point的三个端口列表长度都等于9时，将该Point亮度设为9。
-    - 连接完成后仅对当前修改过的Point执行一次单点菱形渲染。
+    Connection logic:
+    - Only executed if annealing modified any cell (block_modified_flag).
+    - For each of four directions, if random_pool condition is met,
+      the connection type is determined by summing 3 consecutive
+      random_pool values that are < 4:
+        * count == 1 -> signal connection: output <-> input (bidirectional)
+        * count == 2 -> control connection: output <-> control (bidirectional)
+        * otherwise  -> default to control connection
+    - Both sides must have < MAX_PORTS_PER_TYPE ports for the target type.
+    - After connection, if all three port types reach MAX_PORTS_PER_TYPE,
+      set brightness to ACTIVE_BRIGHTNESS.
+    - After connection, re-render the active Point if brightness > 0.
 
-    参数:
-        grid: 长度为1024的网格列表
-        active_points: [(point_index, brightness), ...] 活跃点列表
-        random_pool: 随机池列表，用于端口类型判定和连接方向判定
-        grid_name: 网格名称字符串，如"grid_1"
+    Args:
+        grid: list of length TOTAL_CELLS
+        active_points: list of (point_index, brightness) tuples
+        random_pool: list of random integers used for connection decisions
+        grid_name: name string of the grid layer
 
-    返回:
-        list: 退火并建立连接后的网格列表
+    Returns:
+        list: the modified grid
     """
     for point_index, source_brightness in active_points:
-        column_x = point_index % 32
-        row_y = point_index // 32
+        column_x = point_index % GRID_SIDE_LENGTH
+        row_y = point_index // GRID_SIDE_LENGTH
         block_modified_flag = False
 
-        # 调试打印：每个活跃点开始处理
-        print(f"[退火] 网格={grid_name}, 索引={point_index}, 亮度={source_brightness}")
+        print(f"[Anneal] grid={grid_name}, index={point_index}, brightness={source_brightness}")
 
-        # 退火：减法操作，遍历范围 manhattan_distance <= source_brightness
         for delta_y in range(-source_brightness, source_brightness + 1):
             for delta_x in range(-source_brightness, source_brightness + 1):
                 manhattan_distance = abs(delta_x) + abs(delta_y)
@@ -287,9 +319,8 @@ def anneal_and_connect(grid, active_points, random_pool, grid_name):
                     continue
                 neighbor_x = column_x + delta_x
                 neighbor_y = row_y + delta_y
-                if 0 <= neighbor_x < 32 and 0 <= neighbor_y < 32:
-                    target_flat_index = neighbor_y * 32 + neighbor_x
-                    # 计算亮度变化量（负值），退火是减法操作
+                if 0 <= neighbor_x < GRID_SIDE_LENGTH and 0 <= neighbor_y < GRID_SIDE_LENGTH:
+                    target_flat_index = neighbor_y * GRID_SIDE_LENGTH + neighbor_x
                     computed_change = -(source_brightness - manhattan_distance)
                     changed = False
                     if isinstance(grid[target_flat_index], Point):
@@ -309,134 +340,116 @@ def anneal_and_connect(grid, active_points, random_pool, grid_name):
                     if changed:
                         block_modified_flag = True
 
-        # 连接建立：仅在退火修改了区域且random_pool条件满足时执行
         if block_modified_flag:
-            # 四个方向：下(+32)、上(-32)、左(-1)、右(+1)
             for direction_offset in [32, -32, -1, 1]:
                 if point_index < len(random_pool) and random_pool[point_index] == 1:
-                    target_idx = point_index + direction_offset
-                    if 0 <= target_idx < 1024:
-                        if isinstance(grid[target_idx], Point):
-                            if grid[target_idx].brightness < 9:
-                                # 确定端口类型：根据random_pool连续3个值累加
+                    target_index = point_index + direction_offset
+                    if 0 <= target_index < TOTAL_CELLS:
+                        if isinstance(grid[target_index], Point):
+                            if grid[target_index].brightness < MAX_BRIGHTNESS:
                                 port_type_accumulator = 0
                                 for offset_counter in range(3):
                                     if point_index + offset_counter < len(random_pool) and random_pool[point_index + offset_counter] < 4:
                                         port_type_accumulator += 1
-                                if port_type_accumulator == 1:
-                                    port_label = "control"
-                                elif port_type_accumulator == 2:
-                                    port_label = "input"
-                                elif port_type_accumulator == 3:
-                                    port_label = "output"
-                                else:
-                                    port_label = "control"
 
-                                # 分别检查三种端口列表长度，只有<9时才建立该类型连接
                                 connection_established = False
 
-                                if port_label == "control":
-                                    if len(grid[target_idx].control_ports) < 9 and len(grid[point_index].control_ports) < 9:
-                                        connection_info_source = {
-                                            "block_name": grid_name,
-                                            "port_identifier": "control",
+                                if port_type_accumulator == 1:
+                                    if len(grid[target_index].input_ports) < MAX_PORTS_PER_TYPE and len(grid[point_index].output_ports) < MAX_PORTS_PER_TYPE:
+                                        source_connection = {
                                             "source_point_index": point_index,
-                                            "target_point_index": target_idx,
-                                            "signal": 0
+                                            "target_point_index": target_index,
+                                            "signal": 0,
+                                            "port_type": "output"
                                         }
-                                        connection_info_target = {
-                                            "block_name": grid_name,
-                                            "port_identifier": "control",
-                                            "source_point_index": target_idx,
+                                        target_connection = {
+                                            "source_point_index": target_index,
                                             "target_point_index": point_index,
-                                            "signal": 0
+                                            "signal": 0,
+                                            "port_type": "input"
                                         }
-                                        grid[point_index].control_ports.append(connection_info_source)
-                                        grid[target_idx].control_ports.append(connection_info_target)
+                                        grid[point_index].output_ports.append(source_connection)
+                                        grid[target_index].input_ports.append(target_connection)
                                         connection_established = True
-                                        print(f"[连接] 网格={grid_name}, 端口类型=control, 源索引={point_index}, 目标索引={target_idx}")
+                                        print(f"[Connect] grid={grid_name}, type=signal(output->input), source={point_index}, target={target_index}")
 
-                                elif port_label == "input":
-                                    if len(grid[target_idx].input_ports) < 9 and len(grid[point_index].input_ports) < 9:
-                                        connection_info_source = {
-                                            "block_name": grid_name,
-                                            "port_identifier": "input",
+                                elif port_type_accumulator == 2:
+                                    if len(grid[target_index].control_ports) < MAX_PORTS_PER_TYPE and len(grid[point_index].output_ports) < MAX_PORTS_PER_TYPE:
+                                        source_connection = {
                                             "source_point_index": point_index,
-                                            "target_point_index": target_idx,
-                                            "signal": 0
+                                            "target_point_index": target_index,
+                                            "signal": 0,
+                                            "port_type": "output"
                                         }
-                                        connection_info_target = {
-                                            "block_name": grid_name,
-                                            "port_identifier": "input",
-                                            "source_point_index": target_idx,
+                                        target_connection = {
+                                            "source_point_index": target_index,
                                             "target_point_index": point_index,
-                                            "signal": 0
+                                            "signal": 0,
+                                            "port_type": "control"
                                         }
-                                        grid[point_index].input_ports.append(connection_info_source)
-                                        grid[target_idx].input_ports.append(connection_info_target)
+                                        grid[point_index].output_ports.append(source_connection)
+                                        grid[target_index].control_ports.append(target_connection)
                                         connection_established = True
-                                        print(f"[连接] 网格={grid_name}, 端口类型=input, 源索引={point_index}, 目标索引={target_idx}")
+                                        print(f"[Connect] grid={grid_name}, type=control(output->control), source={point_index}, target={target_index}")
 
-                                elif port_label == "output":
-                                    if len(grid[target_idx].output_ports) < 9 and len(grid[point_index].output_ports) < 9:
-                                        connection_info_source = {
-                                            "block_name": grid_name,
-                                            "port_identifier": "output",
+                                else:
+                                    if len(grid[target_index].control_ports) < MAX_PORTS_PER_TYPE and len(grid[point_index].output_ports) < MAX_PORTS_PER_TYPE:
+                                        source_connection = {
                                             "source_point_index": point_index,
-                                            "target_point_index": target_idx,
-                                            "signal": 0
+                                            "target_point_index": target_index,
+                                            "signal": 0,
+                                            "port_type": "output"
                                         }
-                                        connection_info_target = {
-                                            "block_name": grid_name,
-                                            "port_identifier": "output",
-                                            "source_point_index": target_idx,
+                                        target_connection = {
+                                            "source_point_index": target_index,
                                             "target_point_index": point_index,
-                                            "signal": 0
+                                            "signal": 0,
+                                            "port_type": "control"
                                         }
-                                        grid[point_index].output_ports.append(connection_info_source)
-                                        grid[target_idx].output_ports.append(connection_info_target)
+                                        grid[point_index].output_ports.append(source_connection)
+                                        grid[target_index].control_ports.append(target_connection)
                                         connection_established = True
-                                        print(f"[连接] 网格={grid_name}, 端口类型=output, 源索引={point_index}, 目标索引={target_idx}")
+                                        print(f"[Connect] grid={grid_name}, type=control(default), source={point_index}, target={target_index}")
 
-                                # 连接建立后检查：若三个端口列表长度都等于9，设亮度为9
                                 if connection_established:
-                                    if (len(grid[point_index].control_ports) == 9 and
-                                        len(grid[point_index].input_ports) == 9 and
-                                        len(grid[point_index].output_ports) == 9):
-                                        grid[point_index].brightness = 9
-                                    if (len(grid[target_idx].control_ports) == 9 and
-                                        len(grid[target_idx].input_ports) == 9 and
-                                        len(grid[target_idx].output_ports) == 9):
-                                        grid[target_idx].brightness = 9
+                                    if (len(grid[point_index].control_ports) == MAX_PORTS_PER_TYPE and
+                                        len(grid[point_index].input_ports) == MAX_PORTS_PER_TYPE and
+                                        len(grid[point_index].output_ports) == MAX_PORTS_PER_TYPE):
+                                        grid[point_index].brightness = ACTIVE_BRIGHTNESS
+                                    if (len(grid[target_index].control_ports) == MAX_PORTS_PER_TYPE and
+                                        len(grid[target_index].input_ports) == MAX_PORTS_PER_TYPE and
+                                        len(grid[target_index].output_ports) == MAX_PORTS_PER_TYPE):
+                                        grid[target_index].brightness = ACTIVE_BRIGHTNESS
 
-                                    # 连接完成后仅对当前修改过的Point执行一次单点菱形渲染
                                     if grid[point_index].brightness > 0:
                                         grid = diamond_render_single_point(grid, point_index, grid[point_index].brightness)
-                                        print(f"[重渲染] 网格={grid_name}, 索引={point_index}")
+                                        print(f"[Re-render] grid={grid_name}, index={point_index}")
 
     return grid
 
 
 # ===========================================================================
-# 预加载函数
+# Preload Function
 # ===========================================================================
-def preload_next_grid(source_grid, target_grid, active_points):
-    """将源网格活跃点的菱形扩散预加载到目标网格的前3行。
+def preload_next_grid(source_grid: list, target_grid: list,
+                       active_points: list) -> list:
+    """Preload diamond diffusion from source grid to the first 3 rows of target.
 
-    仅对目标网格的 y < 3 区域进行亮度扩散（加法操作），
-    用于跨网格的信号预加载。
+    Only applies diffusion to cells with row_y < 3 in the target grid.
+    Logic is the same as rendering: additive, max accumulation, capped at
+    MAX_BRIGHTNESS.
 
-    参数:
-        source_grid: 源网格列表（长度为1024）
-        target_grid: 目标网格列表（长度为1024）
-        active_points: 源网格的活跃点列表
+    Args:
+        source_grid: list of length TOTAL_CELLS
+        target_grid: list of length TOTAL_CELLS
+        active_points: list of (point_index, brightness) from source grid
 
-    返回:
-        list: 修改后的目标网格列表
+    Returns:
+        list: the modified target grid
     """
     for point_index, _ in active_points:
-        column_x = point_index % 32
-        row_y = point_index // 32
+        column_x = point_index % GRID_SIDE_LENGTH
+        row_y = point_index // GRID_SIDE_LENGTH
         source_brightness = source_grid[point_index].brightness
         for delta_y in range(-source_brightness, source_brightness + 1):
             for delta_x in range(-source_brightness, source_brightness + 1):
@@ -445,36 +458,162 @@ def preload_next_grid(source_grid, target_grid, active_points):
                     continue
                 neighbor_x = column_x + delta_x
                 neighbor_y = row_y + delta_y
-                # 仅处理目标网格的前3行（y < 3）
-                if 0 <= neighbor_x < 32 and 0 <= neighbor_y < 3:
-                    target_flat_index = neighbor_y * 32 + neighbor_x
+                if 0 <= neighbor_x < GRID_SIDE_LENGTH and 0 <= neighbor_y < 3:
+                    target_flat_index = neighbor_y * GRID_SIDE_LENGTH + neighbor_x
                     computed_brightness = source_brightness - manhattan_distance
                     if isinstance(target_grid[target_flat_index], Point):
                         if computed_brightness > target_grid[target_flat_index].brightness:
-                            target_grid[target_flat_index].brightness = min(computed_brightness, 9)
+                            target_grid[target_flat_index].brightness = min(computed_brightness, MAX_BRIGHTNESS)
                     else:
                         if computed_brightness > target_grid[target_flat_index]:
-                            target_grid[target_flat_index] = min(computed_brightness, 9)
+                            target_grid[target_flat_index] = min(computed_brightness, MAX_BRIGHTNESS)
     return target_grid
 
 
 # ===========================================================================
-# 显示函数
+# Movement Phase Functions
 # ===========================================================================
-def display_grid(grid, grid_name):
-    """按32×32矩阵格式打印网格的亮度值。
+def execute_movement_phase(grid_layer_1: list, grid_layer_2: list,
+                            grid_layer_3: list, grid_layer_4: list,
+                            grid_layer_5: list) -> tuple:
+    """Execute Point movement across all five grid layers.
 
-    对于Point对象打印其brightness属性值，
-    对于非Point位置直接打印存储的数字值。
+    For each layer: detect all Points, evaluate movement direction
+    for each, move the Point if applicable, and update all connection
+    references. Uses a moved_to_indices set to prevent re-processing
+    Points that have already been moved into new positions.
 
-    参数:
-        grid: 长度为1024的网格列表
-        grid_name: 网格名称字符串，如"Grid 1"
+    Args:
+        grid_layer_1 ~ grid_layer_5: five grid layers
+
+    Returns:
+        tuple: (grid_layer_1, ..., grid_layer_5) after movement
+    """
+    grids = [grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5]
+    grid_names = ["grid_layer_1", "grid_layer_2", "grid_layer_3", "grid_layer_4", "grid_layer_5"]
+    for grid_index in range(len(grids)):
+        grid = grids[grid_index]
+        grid_name = grid_names[grid_index]
+        all_points = detect_all_points(grid)
+        moved_to_indices = set()
+        for original_index, _ in all_points:
+            if original_index in moved_to_indices:
+                continue
+            if not isinstance(grid[original_index], Point):
+                continue
+            new_index = determine_movement_direction(grid, original_index)
+            if new_index == -1:
+                continue
+            grid[new_index] = grid[original_index]
+            grid[new_index].center_index = new_index
+            grid[original_index] = 0
+            update_connections_after_move(grid, grid_name, original_index, new_index)
+            moved_to_indices.add(new_index)
+            print(f"[Move] grid={grid_name}, old_index={original_index} -> new_index={new_index}")
+    return grids[0], grids[1], grids[2], grids[3], grids[4]
+
+
+# ===========================================================================
+# Signal Propagation Function
+# ===========================================================================
+def transistor_style_signal_propagation(grid_layer_1: list,
+                                         grid_layer_2: list,
+                                         grid_layer_3: list,
+                                         grid_layer_4: list,
+                                         grid_layer_5: list) -> tuple:
+    """Propagate signals through all five layers in transistor style.
+
+    Strict processing order: grid_layer_1 -> grid_layer_2 -> ... ->
+    grid_layer_5. Within each layer, top-to-bottom, left-to-right
+    (index 0 -> TOTAL_CELLS-1). Only Point objects are processed.
+
+    For each Point:
+    1. Collect input_ports signals > 0.
+    2. If any control_ports has signal > CONTROL_SIGNAL_THRESHOLD,
+       clear control signals, clear input signals, skip to next node.
+    3. Take max input signal as output_signal. Traverse output_ports,
+       set signal = output_signal. Find target node's receiving port
+       (input or control), update signal, sync target brightness.
+    4. Clear own output_ports signals.
+    5. Clear own control_ports signals.
+    6. Clear own input_ports signals.
+
+    Connections are never deleted.
+
+    Args:
+        grid_layer_1 ~ grid_layer_5: five grid layers
+
+    Returns:
+        tuple: (grid_layer_1, ..., grid_layer_5) after signal propagation
+    """
+    all_grids = [grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5]
+
+    for grid in all_grids:
+        for i in range(len(grid)):
+            if not isinstance(grid[i], Point):
+                continue
+            point = grid[i]
+
+            input_signals = []
+            for input_connection in point.input_ports:
+                signal_value = input_connection.get("signal", 0)
+                if signal_value > 0:
+                    input_signals.append(signal_value)
+
+            control_triggered = False
+            for control_connection in point.control_ports:
+                if control_connection.get("signal", 0) > CONTROL_SIGNAL_THRESHOLD:
+                    control_triggered = True
+                    break
+
+            if control_triggered:
+                for control_connection in point.control_ports:
+                    control_connection["signal"] = 0
+                for input_connection in point.input_ports:
+                    input_connection["signal"] = 0
+                continue
+
+            output_signal = max(input_signals) if input_signals else 0
+
+            for output_connection in point.output_ports:
+                output_connection["signal"] = output_signal
+                target_index = output_connection.get("target_point_index", -1)
+                if 0 <= target_index < TOTAL_CELLS and isinstance(grid[target_index], Point):
+                    target_point = grid[target_index]
+                    for receiving_connection in target_point.input_ports:
+                        if receiving_connection.get("target_point_index") == i:
+                            receiving_connection["signal"] = output_signal
+                    for receiving_connection in target_point.control_ports:
+                        if receiving_connection.get("target_point_index") == i:
+                            receiving_connection["signal"] = output_signal
+                    target_point.brightness = min(max(target_point.brightness, output_signal), MAX_BRIGHTNESS)
+
+            for output_connection in point.output_ports:
+                output_connection["signal"] = 0
+            for control_connection in point.control_ports:
+                control_connection["signal"] = 0
+            for input_connection in point.input_ports:
+                input_connection["signal"] = 0
+
+    return grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5
+
+
+# ===========================================================================
+# Display Function
+# ===========================================================================
+def display_grid(grid: list, grid_name: str) -> None:
+    """Print the grid in 32x32 matrix format.
+
+    Prints brightness for Point objects and the numeric value otherwise.
+
+    Args:
+        grid: list of length TOTAL_CELLS
+        grid_name: display name for the grid
     """
     print(f"====== {grid_name} ======")
-    for i in range(0, 32 * 32, 32):
+    for i in range(0, TOTAL_CELLS, GRID_SIDE_LENGTH):
         row = []
-        for j in range(i, i + 32):
+        for j in range(i, i + GRID_SIDE_LENGTH):
             if isinstance(grid[j], Point):
                 row.append(str(grid[j].brightness))
             else:
@@ -484,119 +623,111 @@ def display_grid(grid, grid_name):
 
 
 # ===========================================================================
-# API 函数
+# API Functions
 # ===========================================================================
-def initialize_api_ports(grid_1, grid_5):
-    """初始化API输入输出端口。
+def initialize_api_ports(grid_layer_1: list, grid_layer_5: list) -> tuple:
+    """Initialize API input and output port Points.
 
-    在grid_1的第一行（索引0~31）放置32个亮度=0的空Point作为API输入端口。
-    在grid_5的最后一行（索引992~1023）放置32个亮度=0的空Point作为API输出端口。
+    Creates 32 brightness=0 Points in grid_layer_1 first row (index 0~31)
+    as API input ports, and 32 in grid_layer_5 last row (index 992~1023)
+    as API output ports.
 
-    参数:
-        grid_1: 网格1列表
-        grid_5: 网格5列表
+    Args:
+        grid_layer_1: grid layer 1
+        grid_layer_5: grid layer 5
 
-    返回:
-        tuple: (修改后的grid_1, 修改后的grid_5)
+    Returns:
+        tuple: (grid_layer_1, grid_layer_5) with API ports initialized
     """
-    # grid_1 第一行：32个API输入端口（初始亮度为0，等待二进制字符串输入）
-    for port_index in range(32):
-        grid_1[port_index] = Point(center_index=port_index, brightness=0)
+    for port_index in range(API_PORT_COUNT):
+        grid_layer_1[port_index] = Point(center_index=port_index, brightness=0)
 
-    # grid_5 最后一行（索引992~1023）：32个API输出端口（初始亮度为0）
-    for port_index in range(992, 1024):
-        grid_5[port_index] = Point(center_index=port_index, brightness=0)
+    for port_index in range(TOTAL_CELLS - API_PORT_COUNT, TOTAL_CELLS):
+        grid_layer_5[port_index] = Point(center_index=port_index, brightness=0)
 
-    return grid_1, grid_5
+    return grid_layer_1, grid_layer_5
 
 
-def set_api_input(grid_1, binary_string):
-    """将二进制字符串写入grid_1第一行的API输入端口。
+def set_api_input(grid_layer_1: list, binary_string: str) -> bool:
+    """Write a 32-bit binary string to grid_layer_1 first row API ports.
 
-    按索引依次设置grid_1[0]~grid_1[31]共32个Point的brightness值：
-    字符'1'对应brightness=9，字符'0'对应brightness=0。
-    同时在每个端口的input_ports中记录单向信号（不需要双向连接）。
-    输入不足32位自动补0，超过32位自动截断。
+    '1' -> brightness=9, signal=9; '0' -> brightness=0, signal=0.
+    Adds a one-way input_ports record with source=-1, target=port_index,
+    signal=9/0, port_type="input". Short input is zero-padded to 32,
+    long input is truncated to 32.
 
-    参数:
-        grid_1: 网格1列表
-        binary_string: 二进制字符串，如"0100100001101001..."
+    Args:
+        grid_layer_1: grid layer 1
+        binary_string: binary string, e.g. "01001000..."
 
-    返回:
-        bool: 设置成功返回True，失败返回False
+    Returns:
+        bool: True on success, False on invalid character
     """
+    if len(binary_string) < API_PORT_COUNT:
+        binary_string = binary_string.ljust(API_PORT_COUNT, '0')
+    elif len(binary_string) > API_PORT_COUNT:
+        binary_string = binary_string[:API_PORT_COUNT]
 
-    # 自动补齐或截断到32位
-    if len(binary_string) < 32:
-        binary_string = binary_string.ljust(32, '0')
-    elif len(binary_string) > 32:
-        binary_string = binary_string[:32]
-
-    for port_index in range(32):
-        char = binary_string[port_index]
-        if char == '1':
-            signal_value = 9
-        elif char == '0':
+    for port_index in range(API_PORT_COUNT):
+        character = binary_string[port_index]
+        if character == '1':
+            signal_value = ACTIVE_BRIGHTNESS
+        elif character == '0':
             signal_value = 0
         else:
-            print(f"[API] 错误：binary_string第{port_index}位不是0或1，收到'{char}'")
+            print(f"[API] Error: binary_string position {port_index} is not 0 or 1, received '{character}'")
             return False
 
-        if isinstance(grid_1[port_index], Point):
-            grid_1[port_index].brightness = signal_value
-            # 清空旧的API信号记录，添加新的单向信号记录
-            grid_1[port_index].input_ports.clear()
-            grid_1[port_index].input_ports.append({
-                "block_name": "api_input",
-                "port_identifier": "input",
+        if isinstance(grid_layer_1[port_index], Point):
+            grid_layer_1[port_index].brightness = signal_value
+            grid_layer_1[port_index].input_ports.clear()
+            grid_layer_1[port_index].input_ports.append({
                 "source_point_index": -1,
                 "target_point_index": port_index,
-                "signal": signal_value
+                "signal": signal_value,
+                "port_type": "input"
             })
         else:
-            grid_1[port_index] = Point(center_index=port_index, brightness=signal_value)
-            grid_1[port_index].input_ports.append({
-                "block_name": "api_input",
-                "port_identifier": "input",
+            grid_layer_1[port_index] = Point(center_index=port_index, brightness=signal_value)
+            grid_layer_1[port_index].input_ports.append({
                 "source_point_index": -1,
                 "target_point_index": port_index,
-                "signal": signal_value
+                "signal": signal_value,
+                "port_type": "input"
             })
 
-    print(f"[API] set_api_input: 已写入32位二进制字符串 -> {binary_string}")
+    print(f"[API] set_api_input: wrote 32-bit binary -> {binary_string}")
     return True
 
 
-def get_api_output(grid_5):
-    """读取grid_5最后一行API输出端口，转换为UTF-8字符。
+def get_api_output(grid_layer_5: list) -> str:
+    """Read grid_layer_5 last row API ports and convert to UTF-8 character.
 
-    读取grid_5索引992~1023的32个Point的brightness值，
-    将>=5的视为'1'，<5的视为'0'，拼接成32位二进制字符串。
-    再将32位二进制字符串按每8位一组拆分为4个字节，
-    转换为UTF-8编码的字符并返回。
+    Reads 32 Points at indices 992~1023. brightness >= 5 -> '1', < 5 -> '0'.
+    Concatenates into 32-bit binary, splits into 4 bytes of 8 bits,
+    decodes as UTF-8. Returns the raw binary string on decode failure.
 
-    参数:
-        grid_5: 网格5列表
+    Args:
+        grid_layer_5: grid layer 5
 
-    返回:
-        str: UTF-8解码后的字符，解码失败则返回原始二进制字符串
+    Returns:
+        str: UTF-8 decoded character, or raw binary string on failure
     """
     binary_output = ""
-    for port_index in range(992, 1024):
-        if isinstance(grid_5[port_index], Point):
-            if grid_5[port_index].brightness >= 5:
+    for port_index in range(TOTAL_CELLS - API_PORT_COUNT, TOTAL_CELLS):
+        if isinstance(grid_layer_5[port_index], Point):
+            if grid_layer_5[port_index].brightness >= 5:
                 binary_output += "1"
             else:
                 binary_output += "0"
         else:
             binary_output += "0"
 
-    # 将32位二进制字符串按每8位拆分为字节，转换为UTF-8字符
     try:
         byte_list = []
-        for byte_index in range(0, 32, 8):
-            byte_str = binary_output[byte_index:byte_index + 8]
-            byte_value = int(byte_str, 2)
+        for byte_index in range(0, API_PORT_COUNT, 8):
+            byte_string = binary_output[byte_index:byte_index + 8]
+            byte_value = int(byte_string, 2)
             byte_list.append(byte_value)
         byte_data = bytes(byte_list)
         utf8_character = byte_data.decode("utf-8")
@@ -605,190 +736,130 @@ def get_api_output(grid_5):
         return binary_output
 
 
-def propagate_signals(grid_1, grid_2, grid_3, grid_4, grid_5):
-    """在所有已建立连接的端口间传播signal值。
-
-    遍历所有5个网格的所有Point，检查每个Point的output_ports列表。
-    若某个output_port的signal值不为0，则将该signal值传播到
-    target_point_index对应Point的input_ports中匹配的连接。
-
-    参数:
-        grid_1 ~ grid_5: 五个网格列表
-
-    返回:
-        tuple: (grid_1, grid_2, grid_3, grid_4, grid_5) 信号传播后的网格
-    """
-    all_grids = [grid_1, grid_2, grid_3, grid_4, grid_5]
-
-    for grid in all_grids:
-        for i in range(len(grid)):
-            if isinstance(grid[i], Point):
-                point = grid[i]
-                # 遍历该Point的所有output_ports
-                for output_conn in point.output_ports:
-                    signal_val = output_conn.get("signal", 0)
-                    if signal_val != 0:
-                        target_idx = output_conn.get("target_point_index", -1)
-                        source_idx = output_conn.get("source_point_index", -1)
-                        # 在目标Point的input_ports中查找匹配的连接并更新signal
-                        if 0 <= target_idx < 1024 and isinstance(grid[target_idx], Point):
-                            for input_conn in grid[target_idx].input_ports:
-                                if input_conn.get("source_point_index") == target_idx and input_conn.get("target_point_index") == source_idx:
-                                    input_conn["signal"] = signal_val
-                            # 同时更新目标Point的brightness
-                            if signal_val > grid[target_idx].brightness:
-                                grid[target_idx].brightness = min(signal_val, 9)
-
-    return grid_1, grid_2, grid_3, grid_4, grid_5
-
-
 # ===========================================================================
-# 全局变量初始化
+# Global Variable Initialization
 # ===========================================================================
-# 五个32×32网格，每个1024个元素，初值为0
-grid_1 = [0] * 1024
-grid_2 = [0] * 1024
-grid_3 = [0] * 1024
-grid_4 = [0] * 1024
-grid_5 = [0] * 1024
+grid_layer_1 = [0] * TOTAL_CELLS
+grid_layer_2 = [0] * TOTAL_CELLS
+grid_layer_3 = [0] * TOTAL_CELLS
+grid_layer_4 = [0] * TOTAL_CELLS
+grid_layer_5 = [0] * TOTAL_CELLS
 
-# 用户输入相关变量
-user_input_raw = 0
-input_character_list = 0
-unicode_encoded_bytes = 0
-binary_string = 0
-padded_binary_string = 0
+active_points_grid_layer_1 = []
+active_points_grid_layer_2 = []
+active_points_grid_layer_3 = []
+active_points_grid_layer_4 = []
+active_points_grid_layer_5 = []
+
 binary_string_list = []
-
-# 随机池和活跃点列表
 random_pool = []
-active_points_grid_1 = []
-active_points_grid_2 = []
-active_points_grid_3 = []
-active_points_grid_4 = []
-active_points_grid_5 = []
-
-# 当前处理的二进制字符串
-current_binary_string = []
 
 # ===========================================================================
-# 初始种子点放置：每个网格索引30~39处放置10个亮度=4的Point
+# Seed Point Placement: indices 30~39, brightness=SEED_BRIGHTNESS
 # ===========================================================================
 for i in range(10):
-    grid_1[i + 30] = Point(center_index=int(i) + 3, brightness=4)
+    grid_layer_1[i + 30] = Point(center_index=i + 30, brightness=SEED_BRIGHTNESS)
 for i in range(10):
-    grid_2[i + 30] = Point(center_index=int(i) + 3, brightness=4)
+    grid_layer_2[i + 30] = Point(center_index=i + 30, brightness=SEED_BRIGHTNESS)
 for i in range(10):
-    grid_3[i + 30] = Point(center_index=int(i) + 3, brightness=4)
+    grid_layer_3[i + 30] = Point(center_index=i + 30, brightness=SEED_BRIGHTNESS)
 for i in range(10):
-    grid_4[i + 30] = Point(center_index=int(i) + 3, brightness=4)
+    grid_layer_4[i + 30] = Point(center_index=i + 30, brightness=SEED_BRIGHTNESS)
 for i in range(10):
-    grid_5[i + 30] = Point(center_index=int(i) + 3, brightness=4)
+    grid_layer_5[i + 30] = Point(center_index=i + 30, brightness=SEED_BRIGHTNESS)
 
 # ===========================================================================
-# API端口初始化：grid_1首行输入 + grid_5末行输出
+# API Port Initialization
 # ===========================================================================
-grid_1, grid_5 = initialize_api_ports(grid_1, grid_5)
-for i in range(420):
-    grid_1[i + 3] = Point(center_index= int(i) + 3, brightness=4)
-for i in range(420):
-    grid_2[i + 3] = Point(center_index= int(i) + 3, brightness=4)
-for i in range(420):
-    grid_3[i + 3] = Point(center_index= int(i) + 3, brightness=4)
-for i in range(420):
-    grid_4[i + 3] = Point(center_index= int(i) + 3, brightness=4)
-for i in range(420):
-    grid_5[i + 3] = Point(center_index= int(i) + 3, brightness=4)
+grid_layer_1, grid_layer_5 = initialize_api_ports(grid_layer_1, grid_layer_5)
+
 # ===========================================================================
-# 主循环
+# Main Loop
 # ===========================================================================
 while True:
-    # ===== 阶段A：清空并处理输入 =====
-    active_points_grid_1.clear()
-    active_points_grid_2.clear()
-    active_points_grid_3.clear()
-    active_points_grid_4.clear()
-    active_points_grid_5.clear()
+    # ===== Stage A: Input Processing =====
+    active_points_grid_layer_1.clear()
+    active_points_grid_layer_2.clear()
+    active_points_grid_layer_3.clear()
+    active_points_grid_layer_4.clear()
+    active_points_grid_layer_5.clear()
     binary_string_list.clear()
     random_pool.clear()
 
-    # 第一个输入：用于随机池构建和处理逻辑
     user_input_raw = input("input:")
     input_character_list = list(user_input_raw)
     binary_string_list = []
     padded_binary_string_list = []
-    # 逐字符转换为32位二进制字符串
-    for i in input_character_list:
-        unicode_encoded_bytes = i.encode("utf-8")
+
+    for character in input_character_list:
+        unicode_encoded_bytes = character.encode("utf-8")
         binary_string = ''.join(f'{byte:08b}' for byte in unicode_encoded_bytes)
-        padded_binary_string = binary_string.ljust(32, '0')[:32]
-        print(f"'{i}' -> {padded_binary_string}")
+        padded_binary_string = binary_string.ljust(GRID_SIDE_LENGTH, '0')[:GRID_SIDE_LENGTH]
+        print(f"'{character}' -> {padded_binary_string}")
         padded_binary_string_list.append(padded_binary_string)
         binary_string_list.append(padded_binary_string)
 
-    # 构建随机池（仅用第一个输入）
     random_pool = build_random_pool(binary_string_list)
-    print(f"[调试] 随机池长度: {len(random_pool)}")
+    print(f"[Debug] random_pool length: {len(random_pool)}")
 
-    # 第二个输入：用于API输入端口（独立于随机池输入）
     api_input_string = padded_binary_string_list[0]
-    set_api_input(grid_1, api_input_string)
+    set_api_input(grid_layer_1, api_input_string)
 
-    # ===== 阶段B：活跃点检测 =====
-    active_points_grid_1 = detect_active_points(grid_1)
-    active_points_grid_2 = detect_active_points(grid_2)
-    active_points_grid_3 = detect_active_points(grid_3)
-    active_points_grid_4 = detect_active_points(grid_4)
-    active_points_grid_5 = detect_active_points(grid_5)
+    # ===== Stage B: Active Point Detection =====
+    active_points_grid_layer_1 = detect_active_points(grid_layer_1)
+    active_points_grid_layer_2 = detect_active_points(grid_layer_2)
+    active_points_grid_layer_3 = detect_active_points(grid_layer_3)
+    active_points_grid_layer_4 = detect_active_points(grid_layer_4)
+    active_points_grid_layer_5 = detect_active_points(grid_layer_5)
 
-    print(f"[调试] 活跃点数量 - Grid1:{len(active_points_grid_1)}, Grid2:{len(active_points_grid_2)}, Grid3:{len(active_points_grid_3)}, Grid4:{len(active_points_grid_4)}, Grid5:{len(active_points_grid_5)}")
+    print(f"[Debug] active_points count - Layer1:{len(active_points_grid_layer_1)}, Layer2:{len(active_points_grid_layer_2)}, Layer3:{len(active_points_grid_layer_3)}, Layer4:{len(active_points_grid_layer_4)}, Layer5:{len(active_points_grid_layer_5)}")
 
-    # ===== 阶段C：菱形渲染（加法操作）=====
-    grid_1 = render_grid(grid_1, active_points_grid_1)
-    grid_2 = render_grid(grid_2, active_points_grid_2)
-    grid_3 = render_grid(grid_3, active_points_grid_3)
-    grid_4 = render_grid(grid_4, active_points_grid_4)
-    grid_5 = render_grid(grid_5, active_points_grid_5)
+    # ===== Stage C: Diamond Render (Additive) =====
+    grid_layer_1 = render_grid(grid_layer_1, active_points_grid_layer_1)
+    grid_layer_2 = render_grid(grid_layer_2, active_points_grid_layer_2)
+    grid_layer_3 = render_grid(grid_layer_3, active_points_grid_layer_3)
+    grid_layer_4 = render_grid(grid_layer_4, active_points_grid_layer_4)
+    grid_layer_5 = render_grid(grid_layer_5, active_points_grid_layer_5)
 
-    # ===== 阶段D：退火（减法操作）+ 连接建立 =====
-    grid_1 = anneal_and_connect(grid_1, active_points_grid_1, random_pool, "grid_1")
-    grid_2 = anneal_and_connect(grid_2, active_points_grid_2, random_pool, "grid_2")
-    grid_3 = anneal_and_connect(grid_3, active_points_grid_3, random_pool, "grid_3")
-    grid_4 = anneal_and_connect(grid_4, active_points_grid_4, random_pool, "grid_4")
-    grid_5 = anneal_and_connect(grid_5, active_points_grid_5, random_pool, "grid_5")
+    # ===== Stage D: Anneal (Subtractive) + Connection Establishment =====
+    grid_layer_1 = anneal_and_connect(grid_layer_1, active_points_grid_layer_1, random_pool, "grid_layer_1")
+    grid_layer_2 = anneal_and_connect(grid_layer_2, active_points_grid_layer_2, random_pool, "grid_layer_2")
+    grid_layer_3 = anneal_and_connect(grid_layer_3, active_points_grid_layer_3, random_pool, "grid_layer_3")
+    grid_layer_4 = anneal_and_connect(grid_layer_4, active_points_grid_layer_4, random_pool, "grid_layer_4")
+    grid_layer_5 = anneal_and_connect(grid_layer_5, active_points_grid_layer_5, random_pool, "grid_layer_5")
 
-    # ===== 阶段E：退火后清理 —— 将所有非Point位置亮度设为0 =====
-    grid_1 = clear_non_point_brightness(grid_1)
-    grid_2 = clear_non_point_brightness(grid_2)
-    grid_3 = clear_non_point_brightness(grid_3)
-    grid_4 = clear_non_point_brightness(grid_4)
-    grid_5 = clear_non_point_brightness(grid_5)
+    # ===== Stage E: Clear Non-Point Brightness =====
+    grid_layer_1 = clear_non_point_brightness(grid_layer_1)
+    grid_layer_2 = clear_non_point_brightness(grid_layer_2)
+    grid_layer_3 = clear_non_point_brightness(grid_layer_3)
+    grid_layer_4 = clear_non_point_brightness(grid_layer_4)
+    grid_layer_5 = clear_non_point_brightness(grid_layer_5)
 
-    # ===== 阶段F：预加载 —— 跨网格菱形扩散到下一网格的前3行 =====
-    grid_2 = preload_next_grid(grid_1, grid_2, active_points_grid_1)
-    grid_3 = preload_next_grid(grid_2, grid_3, active_points_grid_2)
-    grid_4 = preload_next_grid(grid_3, grid_4, active_points_grid_3)
-    grid_5 = preload_next_grid(grid_4, grid_5, active_points_grid_4)
+    # ===== Stage F: Cross-Layer Preload =====
+    grid_layer_2 = preload_next_grid(grid_layer_1, grid_layer_2, active_points_grid_layer_1)
+    grid_layer_3 = preload_next_grid(grid_layer_2, grid_layer_3, active_points_grid_layer_2)
+    grid_layer_4 = preload_next_grid(grid_layer_3, grid_layer_4, active_points_grid_layer_3)
+    grid_layer_5 = preload_next_grid(grid_layer_4, grid_layer_5, active_points_grid_layer_4)
 
-    # ===== 阶段G：信号传播 =====
-    grid_1, grid_2, grid_3, grid_4, grid_5 = propagate_signals(grid_1, grid_2, grid_3, grid_4, grid_5)
+    # ===== Stage G: Node Movement =====
+    grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5 = execute_movement_phase(
+        grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5
+    )
 
-    # ===== 阶段G+：Point移动与连接更新 =====
-    grid_1, grid_2, grid_3, grid_4, grid_5 = execute_movement_phase(grid_1, grid_2, grid_3, grid_4, grid_5)
+    # ===== Stage H: Transistor-Style Signal Propagation =====
+    grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5 = transistor_style_signal_propagation(
+        grid_layer_1, grid_layer_2, grid_layer_3, grid_layer_4, grid_layer_5
+    )
 
-    # ===== 阶段H：显示输出 =====
-    display_grid(grid_1, "Grid 1")
-    display_grid(grid_2, "Grid 2")
-    display_grid(grid_3, "Grid 3")
-    display_grid(grid_4, "Grid 4")
-    display_grid(grid_5, "Grid 5")
+    # ===== Stage I: Display Grids =====
+    display_grid(grid_layer_1, "Grid Layer 1")
+    display_grid(grid_layer_2, "Grid Layer 2")
+    display_grid(grid_layer_3, "Grid Layer 3")
+    display_grid(grid_layer_4, "Grid Layer 4")
+    display_grid(grid_layer_5, "Grid Layer 5")
 
-    # ===== 阶段I：API输出 =====
-    api_output_character = get_api_output(grid_5)
-    print(f"[API输出] UTF-8字符: {api_output_character}")
+    # ===== Stage J: API Output =====
+    api_output_character = get_api_output(grid_layer_5)
+    print(f"[API Output] UTF-8 character: {api_output_character}")
 
-    # ===== 阶段J：调试信息 =====
-    if isinstance(grid_1[30], Point):
-        print("grid_1[30].control_ports:", grid_1[30].control_ports)
-        print("grid_1[30].input_ports:", grid_1[30].input_ports)
-        print("grid_1[30].output_ports:", grid_1[30].output_ports)
+    # ===== Stage K: Next Round =====
