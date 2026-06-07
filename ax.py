@@ -1,111 +1,85 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import random
-import os
 
 # ===========================================================================
-# 全局配置（这里统一改后缀为.exdc）
+# 全局配置与常量（与主程序保持一致，保证序列化兼容）
 # ===========================================================================
 GRID_SIDE_LENGTH = 32
 TOTAL_CELLS = 1024
 SEED_BRIGHTNESS = 4
 DEFAULT_GRID_LAYERS = 5
-DEFAULT_POINTS_PER_LAYER = 12  # 每层随机12个点，可改
-DEFAULT_FILE_SUFFIX = ".esbc"  # ✅ 你的自定义后缀
+DEFAULT_FILE_SUFFIX = ".exdc"
+GRID_FILE_NAME = "Alice_McCord"
 
 # ===========================================================================
-# Point类（和主程序完全一致）
+# Point 类（与 app.py 完全一致，解决跨文件序列化识别问题）
 # ===========================================================================
 class Point:
     """32x32 grid node class."""
     def __init__(self, center_index: int, brightness: int,
                  control_ports: list | None = None,
                  input_ports: list | None = None,
-                 output_ports: list | None = None):
+                 output_ports: list | None = None,
+                 is_api: bool = False,
+                 api_signal: int = 0):
         self.center_index = center_index
         self.brightness = brightness
         self.control_ports = [] if control_ports is None else control_ports
         self.input_ports = [] if input_ports is None else input_ports
         self.output_ports = [] if output_ports is None else output_ports
+        self.is_api = is_api
+        self.api_signal = api_signal
 
 # ===========================================================================
-# 生成随机网格（不变）
+# 网格生成函数
 # ===========================================================================
 def generate_random_grid(
     layers: int = DEFAULT_GRID_LAYERS,
-    points_per_layer: int = DEFAULT_POINTS_PER_LAYER,
+    points_per_layer: int = 256,
     seed_brightness: int = SEED_BRIGHTNESS
 ) -> np.ndarray:
+    """生成指定层数、随机节点的网格"""
     grid = np.zeros((layers, TOTAL_CELLS), dtype=object)
     for layer_idx in range(layers):
+        # 随机选取节点索引
         point_indices = random.sample(range(TOTAL_CELLS), points_per_layer)
         for idx in point_indices:
             grid[layer_idx][idx] = Point(
                 center_index=idx,
                 brightness=seed_brightness
             )
-    print(f"✅ 网格生成完成：{layers}层 × {TOTAL_CELLS}格，每层{points_per_layer}个随机点")
+    print(f"✅ 随机网格生成完成：{layers} 层 × {TOTAL_CELLS} 单元格，每层 {points_per_layer} 个节点")
     return grid
 
 # ===========================================================================
-# ✅ 修正：保存为纯.exdc后缀（禁止numpy自动加.npy）
+# 网格保存函数（标准 .exdc 格式）
 # ===========================================================================
 def save_grid_to_binary(
     grid: np.ndarray,
     filename: str,
     suffix: str = DEFAULT_FILE_SUFFIX
 ) -> None:
+    """将网格保存为 exdc 二进制文件"""
     full_filename = f"{filename}{suffix}"
-    # 关键：用文件对象保存，numpy不会自动加后缀
     with open(full_filename, "wb") as f:
         np.save(f, grid, allow_pickle=True)
-    print(f"✅ 网格已保存为：{full_filename}（无多余后缀）")
+    print(f"✅ 网格已成功保存至：{full_filename}")
 
 # ===========================================================================
-# ✅ 修正：读取.exdc后缀文件
-# ===========================================================================
-def load_grid_component(
-    filename: str,
-    suffix: str = DEFAULT_FILE_SUFFIX,
-    layer: int | None = None,
-    index_range: tuple | None = None
-) -> np.ndarray:
-    full_filename = f"{filename}{suffix}"
-    # 关键：用文件对象读取，避免numpy自动补.npy
-    with open(full_filename, "rb") as f:
-        full_grid = np.load(f, allow_pickle=True)
-    
-    if layer is not None:
-        full_grid = full_grid[layer:layer+1]
-    if index_range is not None:
-        start, end = index_range
-        full_grid = full_grid[:, start:end]
-    
-    print(f"✅ 分量读取完成：加载了{full_grid.shape[0]}层，每层{full_grid.shape[1]}个单元格")
-    return full_grid
-
-# ===========================================================================
-# 示例用法（注释掉分量读取，避免报错）
+# 主执行入口
 # ===========================================================================
 if __name__ == "__main__":
-    # 1. 生成随机网格
-    my_grid = generate_random_grid(
+    # 生成 5 层网格，每层 256 个随机节点
+    target_grid = generate_random_grid(
         layers=5,
-        points_per_layer=12,
+        points_per_layer=256,
         seed_brightness=4
     )
-    
-    # 2. 保存为 my_custom_grid.exdc
+
+    # 保存为 Alice_McCord.exdc（与主程序读取名称对应）
     save_grid_to_binary(
-        grid=my_grid,
-        filename="Alice_McCord",
-        suffix=".exdc"
+        grid=target_grid,
+        filename=GRID_FILE_NAME,
+        suffix=DEFAULT_FILE_SUFFIX
     )
-    
-    # 3. 注释掉分量读取，避免刚保存就读取的测试报错
-    # partial_grid = load_grid_component(
-    #     filename="my_custom_grid",
-    #     suffix=".exdc",
-    #     layer=1,
-    #     index_range=(0, 200)
-    # )
